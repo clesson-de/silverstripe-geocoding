@@ -1,0 +1,35 @@
+{
+    "name": "clesson-de/silverstripe-geocoding",
+    "description": "Geocoding, reverse geocoding and routing for Silverstripe CMS, backed by OpenStreetMap (Nominatim/OSRM) and Google Maps.",
+    "type": "silverstripe-vendormodule",
+    "license": "BSD-3-Clause",
+    "keywords": ["silverstripe", "geocoding", "maps", "routing"],
+    "authors": [
+        {
+            "name": "Kai Feldmaier",
+            "email": "kai.feldmaier@clesson.de",
+            "homepage": "https://clesson.de"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "ext-gd": "*",
+        "silverstripe/framework": "^6",
+        "clesson-de/silverstripe-contacts": "^1",
+        "guzzlehttp/guzzle": "^7",
+        "symbiote/silverstripe-gridfieldextensions": "^5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Clesson\\Silverstripe\\Geocoding\\": "src/"
+        }
+    },
+    "extra": {
+        "expose": [
+            "client/admin/dist"
+        ]
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
+}
+

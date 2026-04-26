@@ -1,0 +1,32 @@
+---
+Name: geocoding-config
+Before:
+  - '#geocoding-extensions'
+---
+SilverStripe\ORM\FieldType\DBField:
+  composite_db_types:
+    GeoCoordinate: Clesson\Silverstripe\Geocoding\ORM\DBGeoCoordinate
+
+Clesson\Silverstripe\Geocoding\Services\MapProviderRegistry:
+  providers:
+    google: 'Clesson\Silverstripe\Geocoding\Providers\GoogleMapProvider'
+    osm: 'Clesson\Silverstripe\Geocoding\Providers\OpenStreetMapProvider'
+
+# Default map center shown when no marker is set.
+# Overridable in project config:
+#   Clesson\Silverstripe\Geocoding\Forms\MapField:
+#     default_latitude: 48.1351
+#     default_longitude: 11.5820
+Clesson\Silverstripe\Geocoding\Forms\MapField:
+  default_latitude: 51.1657
+  default_longitude: 10.4515
+
+---
+Name: geocoding-cache
+---
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.geocodingQuota:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: 'geocodingQuota'
+

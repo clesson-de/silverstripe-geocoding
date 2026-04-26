@@ -1,0 +1,91 @@
+/**
+ * Map field styling for the geocoding module.
+ *
+ * This stylesheet provides base styling for all map providers.
+ * Provider-specific styles can be added by individual provider modules.
+ */
+.geocoding-map-field {
+  margin-bottom: 16px;
+}
+.geocoding-map-field .geocoding-map-wrapper {
+  width: 100%;
+}
+.geocoding-map-field .geocoding-map-container {
+  width: 100%;
+  height: 400px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f5f5f5;
+}
+.geocoding-map-field .geocoding-map-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.geocoding-map-field .geocoding-map-layer-switcher {
+  padding: 4px 8px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+.geocoding-map-field .geocoding-map-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #fff;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: background 0.15s;
+}
+.geocoding-map-field .geocoding-map-btn:hover {
+  background: #f0f0f0;
+}
+.geocoding-map-field .geocoding-map-btn--clear {
+  color: #c00;
+  border-color: #c00;
+}
+.geocoding-map-field .geocoding-map-btn--clear:hover {
+  background: #fee;
+}
+.geocoding-map-field .geocoding-map-btn--fullscreen {
+  color: #333;
+}
+.geocoding-map-field .message.error {
+  padding: 12px;
+  background: #fee;
+  color: #c00;
+  border: 1px solid #fcc;
+  border-radius: 4px;
+  margin: 0;
+}
+.geocoding-map-field--readonly .geocoding-map-container {
+  opacity: 0.85;
+  cursor: default;
+}
+.geocoding-map-field--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  margin: 0;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.geocoding-map-field--fullscreen .geocoding-map-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+.geocoding-map-field--fullscreen .geocoding-map-container {
+  height: 100%;
+  border-radius: 4px;
+}

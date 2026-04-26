@@ -1,0 +1,96 @@
+en:
+  Clesson\Silverstripe\Geocoding\Common:
+    ID: 'ID'
+    CREATED: 'Created'
+    LAST_EDITED: 'Last edited'
+
+  Clesson\Silverstripe\Geocoding\Extensions\GeocodingConfig:
+    GEOCODING_TAB: 'Geocoding'
+    MAP_DISPLAY_SERVICE: 'Map display service'
+    MAP_DISPLAY_SERVICE_EMPTY: '-- Select a service --'
+    MAP_DISPLAY_SERVICE_DESCRIPTION: 'Choose which geocoding service provider should render interactive maps (e.g. in the CMS).'
+    GEOCODE_SERVICES: 'Geocoding services'
+    REVERSE_GEOCODE_SERVICES: 'Reverse geocoding services'
+    ROUTE_SERVICES: 'Routing services'
+    GEOCODE_SERVICES_HEADER: 'Geocoding (Address → Coordinates)'
+    REVERSE_GEOCODE_SERVICES_HEADER: 'Reverse Geocoding (Coordinates → Address)'
+    ROUTE_SERVICES_HEADER: 'Routing (Calculate Routes)'
+    GEOCODE_SERVICES_DESCRIPTION: 'Convert street addresses into geographic coordinates (latitude/longitude). Services are processed in order (drag to reorder) — the first with available quota is used.'
+    REVERSE_GEOCODE_SERVICES_DESCRIPTION: 'Resolve geographic coordinates (latitude/longitude) back into human-readable addresses. Services are processed in order (drag to reorder) — the first with available quota is used.'
+    ROUTE_SERVICES_DESCRIPTION: 'Calculate routes, distances and travel times between locations. Services are processed in order (drag to reorder) — the first with available quota is used.'
+
+  Clesson\Silverstripe\Geocoding\Extensions\AddressExtension:
+    GEO_COORDINATES: 'Geo coordinates'
+    LATITUDE: 'Latitude'
+    LONGITUDE: 'Longitude'
+
+  Clesson\Silverstripe\Geocoding\Forms\GeoCoordinateField:
+    LATITUDE: 'Latitude'
+    LONGITUDE: 'Longitude'
+
+  Clesson\Silverstripe\Geocoding\Forms\MapField:
+    REMOVE_MARKER: 'Remove marker'
+    FULLSCREEN: 'Fullscreen'
+    EXIT_FULLSCREEN: 'Exit fullscreen'
+    LAYER: 'Map layer'
+
+  Clesson\Silverstripe\Geocoding\Models\GeocodingService:
+    SINGULARNAME: 'Geocoding service'
+    PLURALNAME: 'Geocoding services'
+    NAME: 'Name'
+    ACTIVE: 'Active'
+    SORT: 'Sort order'
+    SERVICE_TYPE: 'Service type'
+    GEOCODE_PRIORITY: 'Geocoding priority'
+    REVERSE_GEOCODE_PRIORITY: 'Reverse geocoding priority'
+    ROUTE_PRIORITY: 'Routing priority'
+    GEOCODE_PRIORITY_DESCRIPTION: 'Higher values mean higher priority. Services with equal priority are sorted by name.'
+    GEOCODE_QUOTA: 'Geocoding quota (per day)'
+    REVERSE_GEOCODE_QUOTA: 'Reverse geocoding quota (per day)'
+    ROUTE_QUOTA: 'Routing quota (per day)'
+    QUOTA_DESCRIPTION: 'Maximum calls per calendar day. Set to 0 for unlimited.'
+    GEOCODE_QUOTA_USAGE: 'Geocoding (usage)'
+    REVERSE_GEOCODE_QUOTA_USAGE: 'Reverse geocoding (usage)'
+    ROUTE_QUOTA_USAGE: 'Routing (usage)'
+    TEST_CONNECTION: 'Test connection'
+    TEST_NOT_IMPLEMENTED: 'Connection test is not implemented for this service type.'
+
+  Clesson\Silverstripe\Geocoding\Models\GoogleService:
+    SINGULARNAME: 'Google service'
+    PLURALNAME: 'Google services'
+    API_KEY: 'API key'
+    API_KEY_DESCRIPTION: 'Your Google Maps API key. Requires the Geocoding API and Directions API to be enabled.'
+    API_KEY_STORED: 'A key is already stored. Leave this field empty to keep the existing key.'
+    TEST_NO_KEY: 'No API key configured.'
+    TEST_SUCCESS: 'API key is valid. Connection successful.'
+    TEST_DENIED: 'Request denied by Google: {error}'
+    TEST_FAILED: 'Unexpected API status: {status}'
+    TEST_ERROR: 'Connection error: {error}'
+
+  Clesson\Silverstripe\Geocoding\Models\OpenStreetMapService:
+    SINGULARNAME: 'OpenStreetMap service'
+    PLURALNAME: 'OpenStreetMap services'
+    BASE_URL: 'Nominatim base URL'
+    BASE_URL_DESCRIPTION: 'Leave empty to use the public Nominatim instance (https://nominatim.openstreetmap.org).'
+    OSRM_BASE_URL: 'OSRM base URL'
+    OSRM_BASE_URL_DESCRIPTION: 'Leave empty to use the public OSRM instance (https://router.project-osrm.org).'
+    RATE_LIMIT_MS: 'Rate limit (ms)'
+    RATE_LIMIT_MS_DESCRIPTION: 'Minimum wait time between two requests in milliseconds. Recommended: 1100 for the public Nominatim instance.'
+    TEST_SUCCESS: 'Nominatim is reachable. Connection successful.'
+    TEST_FAILED: 'Unexpected response (HTTP {code}).'
+    TEST_ERROR: 'Connection error: {error}'
+
+  Clesson\Silverstripe\Geocoding\Models\SiteConfigGeocodeService:
+    QUOTA: 'Quota (calls per day)'
+    SORT: 'Priority'
+    GEOCODING_SERVICE: 'Service'
+
+  Clesson\Silverstripe\Geocoding\Models\SiteConfigReverseGeocodeService:
+    QUOTA: 'Quota (calls per day)'
+    SORT: 'Priority'
+    GEOCODING_SERVICE: 'Service'
+
+  Clesson\Silverstripe\Geocoding\Models\SiteConfigRouteService:
+    QUOTA: 'Quota (calls per day)'
+    SORT: 'Priority'
+    GEOCODING_SERVICE: 'Service'

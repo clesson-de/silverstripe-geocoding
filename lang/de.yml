@@ -1,0 +1,95 @@
+de:
+  Clesson\Silverstripe\Geocoding\Common:
+    ID: 'ID'
+    CREATED: 'Erstellt'
+    LAST_EDITED: 'Zuletzt geändert'
+
+  Clesson\Silverstripe\Geocoding\Extensions\GeocodingConfig:
+    GEOCODING_TAB: 'Geokodierung'
+    MAP_DISPLAY_SERVICE: 'Kartenanzeige-Dienst'
+    MAP_DISPLAY_SERVICE_EMPTY: '-- Dienst auswählen --'
+    MAP_DISPLAY_SERVICE_DESCRIPTION: 'Wählen Sie aus, welcher Geokodierungs-Dienstanbieter interaktive Karten rendern soll (z.B. im CMS).'
+    GEOCODE_SERVICES: 'Geokodierungs-Dienste'
+    REVERSE_GEOCODE_SERVICES: 'Umgekehrte Geokodierungs-Dienste'
+    ROUTE_SERVICES: 'Routing-Dienste'
+    GEOCODE_SERVICES_HEADER: 'Geokodierung (Adresse → Koordinaten)'
+    REVERSE_GEOCODE_SERVICES_HEADER: 'Umgekehrte Geokodierung (Koordinaten → Adresse)'
+    ROUTE_SERVICES_HEADER: 'Routing (Routen berechnen)'
+    GEOCODE_SERVICES_DESCRIPTION: 'Wandelt Straßenadressen in geografische Koordinaten (Breiten-/Längengrad) um. Dienste werden in der Reihenfolge verarbeitet (ziehen zum Sortieren) — der erste mit verfügbarem Kontingent wird verwendet.'
+    REVERSE_GEOCODE_SERVICES_DESCRIPTION: 'Ermittelt aus geografischen Koordinaten (Breiten-/Längengrad) lesbare Adressen. Dienste werden in der Reihenfolge verarbeitet (ziehen zum Sortieren) — der erste mit verfügbarem Kontingent wird verwendet.'
+    ROUTE_SERVICES_DESCRIPTION: 'Berechnet Routen, Entfernungen und Fahrtzeiten zwischen Orten. Dienste werden in der Reihenfolge verarbeitet (ziehen zum Sortieren) — der erste mit verfügbarem Kontingent wird verwendet.'
+
+  Clesson\Silverstripe\Geocoding\Extensions\AddressExtension:
+    GEO_COORDINATES: 'Geokoordinaten'
+    LATITUDE: 'Breitengrad'
+    LONGITUDE: 'Längengrad'
+
+  Clesson\Silverstripe\Geocoding\Forms\GeoCoordinateField:
+    LATITUDE: 'Breitengrad'
+    LONGITUDE: 'Längengrad'
+
+  Clesson\Silverstripe\Geocoding\Forms\MapField:
+    REMOVE_MARKER: 'Marker entfernen'
+    FULLSCREEN: 'Vollbild'
+    EXIT_FULLSCREEN: 'Vollbild beenden'
+    LAYER: 'Kartenebene'
+
+  Clesson\Silverstripe\Geocoding\Models\GeocodingService:
+    SINGULARNAME: 'Geokodierungsdienst'
+    PLURALNAME: 'Geokodierungsdienste'
+    NAME: 'Name'
+    ACTIVE: 'Aktiv'
+    SORT: 'Sortierung'
+    SERVICE_TYPE: 'Dienstart'
+    GEOCODE_PRIORITY: 'Priorität Geokodierung'
+    REVERSE_GEOCODE_PRIORITY: 'Priorität Umgekehrte Geokodierung'
+    ROUTE_PRIORITY: 'Priorität Routing'
+    GEOCODE_PRIORITY_DESCRIPTION: 'Höhere Werte bedeuten höhere Priorität. Bei gleicher Priorität wird nach Name sortiert.'
+    GEOCODE_QUOTA: 'Kontingent Geokodierung (pro Tag)'
+    REVERSE_GEOCODE_QUOTA: 'Kontingent Umgekehrte Geokodierung (pro Tag)'
+    ROUTE_QUOTA: 'Kontingent Routing (pro Tag)'
+    QUOTA_DESCRIPTION: 'Maximale Aufrufe pro Kalendertag. 0 bedeutet unbegrenzt.'
+    GEOCODE_QUOTA_USAGE: 'Geokodierung (Verbrauch)'
+    REVERSE_GEOCODE_QUOTA_USAGE: 'Umg. Geokodierung (Verbrauch)'
+    ROUTE_QUOTA_USAGE: 'Routing (Verbrauch)'
+    TEST_CONNECTION: 'Verbindung testen'
+    TEST_NOT_IMPLEMENTED: 'Der Verbindungstest ist für diesen Diensttyp nicht implementiert.'
+
+  Clesson\Silverstripe\Geocoding\Models\GoogleService:
+    SINGULARNAME: 'Google-Dienst'
+    PLURALNAME: 'Google-Dienste'
+    API_KEY: 'API-Schlüssel'
+    API_KEY_STORED: 'Es ist bereits ein Schlüssel hinterlegt. Lassen Sie dieses Feld leer, um den vorhandenen Schlüssel beizubehalten.'
+    TEST_NO_KEY: 'Kein API-Schlüssel konfiguriert.'
+    TEST_SUCCESS: 'API-Schlüssel ist gültig. Verbindung erfolgreich.'
+    TEST_DENIED: 'Anfrage von Google abgelehnt: {error}'
+    TEST_FAILED: 'Unerwarteter API-Status: {status}'
+    TEST_ERROR: 'Verbindungsfehler: {error}'
+
+  Clesson\Silverstripe\Geocoding\Models\OpenStreetMapService:
+    SINGULARNAME: 'OpenStreetMap-Dienst'
+    PLURALNAME: 'OpenStreetMap-Dienste'
+    BASE_URL: 'Nominatim Basis-URL'
+    BASE_URL_DESCRIPTION: 'Leer lassen für die öffentliche Nominatim-Instanz (https://nominatim.openstreetmap.org).'
+    OSRM_BASE_URL: 'OSRM Basis-URL'
+    OSRM_BASE_URL_DESCRIPTION: 'Leer lassen für die öffentliche OSRM-Instanz (https://router.project-osrm.org).'
+    RATE_LIMIT_MS: 'Rate-Limit (ms)'
+    RATE_LIMIT_MS_DESCRIPTION: 'Mindestwartezeit zwischen zwei Anfragen in Millisekunden. Empfohlen: 1100 für die öffentliche Nominatim-Instanz.'
+    TEST_SUCCESS: 'Nominatim ist erreichbar. Verbindung erfolgreich.'
+    TEST_FAILED: 'Unerwartete Antwort (HTTP {code}).'
+    TEST_ERROR: 'Verbindungsfehler: {error}'
+
+  Clesson\Silverstripe\Geocoding\Models\SiteConfigGeocodeService:
+    QUOTA: 'Kontingent (Aufrufe pro Tag)'
+    SORT: 'Priorität'
+    GEOCODING_SERVICE: 'Dienst'
+
+  Clesson\Silverstripe\Geocoding\Models\SiteConfigReverseGeocodeService:
+    QUOTA: 'Kontingent (Aufrufe pro Tag)'
+    SORT: 'Priorität'
+    GEOCODING_SERVICE: 'Dienst'
+
+  Clesson\Silverstripe\Geocoding\Models\SiteConfigRouteService:
+    QUOTA: 'Kontingent (Aufrufe pro Tag)'
+    SORT: 'Priorität'
+    GEOCODING_SERVICE: 'Dienst'

@@ -1,0 +1,7 @@
+---
+Name: geocoding-routes
+---
+SilverStripe\Control\Director:
+  rules:
+    'geocoding-static-map': 'Clesson\Silverstripe\Geocoding\Controllers\StaticMapController'
+

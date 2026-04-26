@@ -1,0 +1,13 @@
+/**
+ * Styles for the Address GridField thumbnail column.
+ *
+ * Constrains the thumbnail column width and ensures the image sits
+ * vertically centred in the table row.
+ */
+.ss-gridfield table td:has(> img[src*=geocoding-static-map]),
+.ss-gridfield table th:has(+ td > img[src*=geocoding-static-map]) {
+  width: 1%;
+  white-space: nowrap;
+  padding: 4px 8px 4px 4px;
+  vertical-align: middle;
+}

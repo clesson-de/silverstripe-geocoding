@@ -1,0 +1,23 @@
+---
+Name: geocoding-extensions
+---
+SilverStripe\SiteConfig\SiteConfig:
+  extensions:
+    - Clesson\Silverstripe\Geocoding\Extensions\GeocodingConfig
+
+SilverStripe\Admin\LeftAndMain:
+  extensions:
+    - Clesson\Silverstripe\Geocoding\Extensions\LeftAndMainExtension
+
+Clesson\Contacts\Models\Address:
+  extensions:
+    - Clesson\Silverstripe\Geocoding\Extensions\AddressExtension
+
+Clesson\Contacts\Forms\GridFieldConfig_AddressesInContactManager:
+  extensions:
+    - Clesson\Silverstripe\Geocoding\Extensions\AddressGridFieldExtension
+
+Clesson\Contacts\Forms\GridFieldConfig_AddressesInContact:
+  extensions:
+    - Clesson\Silverstripe\Geocoding\Extensions\AddressGridFieldExtension
+
