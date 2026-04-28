@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "build:js": "rollup -c",
-        "build:css": "sass client/admin/src/scss/map-field.scss client/admin/dist/map-field.css --no-source-map && sass client/admin/src/scss/address-grid.scss client/admin/dist/address-grid.css --no-source-map",
+        "build:css": "sass client/admin/src/scss/map-field.scss client/admin/dist/map-field.css --no-source-map && sass client/admin/src/scss/address-grid.scss client/admin/dist/address-grid.css --no-source-map && sass client/admin/src/scss/address-field.scss client/admin/dist/address-field.css --no-source-map",
         "build": "npm run build:js && npm run build:css",
         "watch:js": "rollup -c --watch",
         "watch:css": "sass --watch client/admin/src/scss/map-field.scss client/admin/dist/map-field.css --no-source-map",

@@ -38,7 +38,13 @@ export default [
         output: {
             file: 'client/admin/dist/map-entwine.js',
             format: 'iife',
-            // No hashing — filename must be stable so it can be referenced in PHP
+        },
+    },
+    {
+        input: 'client/admin/src/address-field.js',
+        output: {
+            file: 'client/admin/dist/address-field.js',
+            format: 'iife',
         },
     },
 ];

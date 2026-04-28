@@ -1,6 +1,6 @@
 # silverstripe-geocoding
 
-Geocoding, reverse geocoding and routing for Silverstripe CMS, backed by **OpenStreetMap (Nominatim / OSRM)** and **Google Maps**.
+Geocoding, reverse geocoding and routing for Silverstripe CMS 6.1, backed by **OpenStreetMap (Nominatim / OSRM)** and **Google Maps**.
 
 ## Features
 
@@ -8,6 +8,10 @@ Geocoding, reverse geocoding and routing for Silverstripe CMS, backed by **OpenS
 - **Reverse geocoding** — resolve coordinates back to a postal address
 - **Routing** — calculate a driving route from an origin through optional waypoints to a destination
 - **Two built-in service backends** — OpenStreetMap (free, no API key required) and Google Maps
+- **`Address` model** — standalone address records with international formatting via `commerceguys/addressing`
+- **`AddressType` model** — configurable address type taxonomy (e.g. invoice address, delivery address)
+- **Region dropdown API** — AJAX endpoint for dynamic region/state dropdowns based on the selected country
+- **Automatic geocoding** — `Address` records are geocoded automatically after each write (via `AddressExtension`)
 - **SiteConfig tab** — manage geocoding service records directly from the CMS Settings panel
 - **Custom `DBGeoCoordinate` composite field** — store latitude + longitude in a single `$db` declaration
 - **Rate limiting** — configurable per-service delay between API requests (required by Nominatim's usage policy)
@@ -20,7 +24,7 @@ Geocoding, reverse geocoding and routing for Silverstripe CMS, backed by **OpenS
 |---|---|
 | PHP | `^8.1` |
 | silverstripe/framework | `^6` |
-| clesson-de/silverstripe-contacts | `^1` |
+| commerceguys/addressing | `^2.1` |
 | guzzlehttp/guzzle | `^7` |
 
 ---
@@ -36,6 +40,39 @@ After installation, run a database build:
 ```
 /dev/build?flush=all
 ```
+
+---
+
+## Address and AddressType models
+
+This module provides two standalone models for address management that can be used independently of — or in combination with — the `clesson-de/silverstripe-contacts` module.
+
+### `Address`
+
+Represents a physical address. Fields: `Name`, `AddressLine1`, `AddressLine2`, `PostalCode`, `City`, `Region`, `CountryCode`.
+
+A formatted `Summary` string (localised using `commerceguys/addressing`) is generated automatically `onBeforeWrite`. An interactive map field showing the geocoded coordinates is added via `AddressExtension`.
+
+### `AddressType`
+
+A configurable taxonomy for address types (e.g. invoice address, delivery address). Default types can be seeded in project config:
+
+```yml
+Clesson\Silverstripe\Geocoding\Models\AddressType:
+  default_tags:
+    invoice-address: 'Invoice address'
+    delivery-address: 'Delivery address'
+```
+
+### Region dropdown API
+
+When displaying an `Address` edit form, the region field uses a dynamic dropdown. The module exposes a JSON endpoint that returns subdivision options for a given country:
+
+```
+GET /geocoding-api/address/regions?country=DE&locale=de
+```
+
+Requires `CMS_ACCESS` permission.
 
 ---
 

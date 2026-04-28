@@ -266,6 +266,58 @@ class OpenStreetMapService extends GeocodingService
     }
 
     /**
+     * Returns up to $limit address suggestions for a free-text query using the Nominatim search API.
+     *
+     * Example: suggest('Unter den Linden Berlin', 5)
+     *
+     * @param string $query  Free-text search string.
+     * @param int    $limit  Maximum number of results.
+     * @return array<array{label: string, lat: float, lng: float, street: string, housenumber: string, city: string, postalCode: string, country: string}>
+     */
+    public function suggest(string $query, int $limit = 5): array
+    {
+        $baseUrl = rtrim($this->BaseUrl ?: self::DEFAULT_NOMINATIM_BASE_URL, '/');
+        $url     = $baseUrl . '/search?q=' . urlencode($query)
+            . '&format=json&limit=' . $limit . '&addressdetails=1';
+
+        try {
+            $this->applyRateLimit();
+
+            $client   = new Client();
+            $response = $client->get($url, ['headers' => ['User-Agent' => 'SilverstripeGeocodingModule/1.0']]);
+            $data     = json_decode((string) $response->getBody(), true);
+
+            if (empty($data)) {
+                return [];
+            }
+
+            $suggestions = [];
+
+            foreach ($data as $item) {
+                $addr        = $item['address'] ?? [];
+                $housenumber = $addr['house_number'] ?? '';
+                $road        = $addr['road'] ?? '';
+                $street      = $housenumber !== '' ? $road . ' ' . $housenumber : $road;
+
+                $suggestions[] = [
+                    'label'       => $item['display_name'] ?? '',
+                    'lat'         => (float) ($item['lat'] ?? 0),
+                    'lng'         => (float) ($item['lon'] ?? 0),
+                    'street'      => trim($street),
+                    'housenumber' => $housenumber,
+                    'city'        => $addr['city'] ?? ($addr['town'] ?? ($addr['village'] ?? '')),
+                    'postalCode'  => $addr['postcode'] ?? '',
+                    'country'     => strtoupper($addr['country_code'] ?? ''),
+                ];
+            }
+
+            return $suggestions;
+        } catch (Throwable) {
+            return [];
+        }
+    }
+
+    /**
      * Tests the Nominatim connection by sending a minimal geocode request.
      *
      * Uses the Berlin Brandenburg Gate as a test address.

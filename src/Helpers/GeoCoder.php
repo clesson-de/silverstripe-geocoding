@@ -77,6 +77,41 @@ class GeoCoder
     }
 
     /**
+     * Resolves a free-text query to a list of address suggestions.
+     *
+     * Tries active geocode services in priority order. Returns the first
+     * non-empty result. Falls back to an empty array when no service is
+     * available or no service implements suggest().
+     *
+     * Example: GeoCoder::suggest('Unter den Linden Berlin', 5)
+     *
+     * @param string $query  Free-text query string.
+     * @param int    $limit  Maximum number of results to return.
+     * @return array<array{label: string, lat: float, lng: float, street: string, housenumber: string, city: string, postalCode: string, country: string}>
+     */
+    public static function suggest(string $query, int $limit = 5): array
+    {
+        foreach (self::getCandidates('geocode') as $service) {
+            if (!method_exists($service, 'suggest')) {
+                continue;
+            }
+
+            if (!self::isQuotaAvailable($service, 'geocode')) {
+                continue;
+            }
+
+            $result = $service->suggest($query, $limit);
+
+            if (!empty($result)) {
+                self::incrementQuota($service, 'geocode');
+                return $result;
+            }
+        }
+
+        return [];
+    }
+
+    /**
      * Resolves geographic coordinates to a street address.
      *
      * Tries active services in descending ReverseGeocodePriority order.

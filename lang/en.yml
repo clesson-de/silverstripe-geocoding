@@ -4,6 +4,25 @@ en:
     CREATED: 'Created'
     LAST_EDITED: 'Last edited'
 
+  Clesson\Silverstripe\Geocoding\Models\Address:
+    PLURALNAME: 'Addresses'
+    SINGULARNAME: 'Address'
+    NAME: 'Label'
+    ADDRESS_LINE_1: 'Address line 1'
+    ADDRESS_LINE_2: 'Address line 2'
+    CITY: 'City'
+    POSTAL_CODE: 'Postal code'
+    REGION: 'Region'
+    COUNTRY_CODE: 'Country'
+    SUMMARY: 'Full address'
+
+  Clesson\Silverstripe\Geocoding\Models\AddressType:
+    PLURALNAME: 'Address types'
+    SINGULARNAME: 'Address type'
+    NAME: 'Name'
+    UKEY: 'Unique key'
+    ADDRESSES: 'Assigned addresses'
+
   Clesson\Silverstripe\Geocoding\Extensions\GeocodingConfig:
     GEOCODING_TAB: 'Geocoding'
     MAP_DISPLAY_SERVICE: 'Map display service'
@@ -33,6 +52,15 @@ en:
     FULLSCREEN: 'Fullscreen'
     EXIT_FULLSCREEN: 'Exit fullscreen'
     LAYER: 'Map layer'
+
+  Clesson\Silverstripe\Geocoding\Forms\AddressField:
+    SEARCH_PLACEHOLDER: 'Search address…'
+    CHANGE: 'Select address'
+    CLEAR: 'Remove address'
+    ACCEPT: 'Accept'
+    CANCEL: 'Cancel'
+    MAP_HINT: 'Double-click the map to place a marker, then click "Accept".'
+    NO_PROVIDER: 'No map provider configured.'
 
   Clesson\Silverstripe\Geocoding\Models\GeocodingService:
     SINGULARNAME: 'Geocoding service'

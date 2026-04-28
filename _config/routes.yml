@@ -3,5 +3,6 @@ Name: geocoding-routes
 ---
 SilverStripe\Control\Director:
   rules:
+    'geocoding-api/address//$Action': 'Clesson\Silverstripe\Geocoding\Controllers\AddressController'
     'geocoding-static-map': 'Clesson\Silverstripe\Geocoding\Controllers\StaticMapController'
 

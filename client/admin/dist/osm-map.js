@@ -194,21 +194,60 @@
                         event.latlng.lng
                     );
                 });
-
-                // Clear button: remove marker and reset coordinates
-                container.addEventListener('geocoding:clear', function() {
-                    if (marker) {
-                        map.removeLayer(marker);
-                        marker = null;
-                    }
-                });
             }
+
+            // Clear event: remove marker and reset coordinates (always available)
+            container.addEventListener('geocoding:clear', function() {
+                if (marker) {
+                    map.removeLayer(marker);
+                    marker = null;
+                }
+            });
 
             // Resize event: invalidate Leaflet's size after the container resizes (e.g. fullscreen)
             container.addEventListener('geocoding:resize', function() {
                 setTimeout(function() {
                     map.invalidateSize();
                 }, 50);
+            });
+
+            // Pan-to event: move map to given coordinates, optionally place a marker with popup
+            container.addEventListener('geocoding:pan-to', function(event) {
+                var d = event.detail || {};
+                var lat = parseFloat(d.lat);
+                var lng = parseFloat(d.lng);
+                if (isNaN(lat) || isNaN(lng)) { return; }
+
+                var zoom = parseInt(d.zoom, 10) || params.markerZoom || 15;
+                map.setView([lat, lng], zoom);
+
+                if (d.placeMarker) {
+                    if (marker) {
+                        marker.setLatLng([lat, lng]);
+                    } else {
+                        marker = L.marker([lat, lng], { draggable: params.allowPlaceMarker }).addTo(map);
+                        if (params.allowPlaceMarker) {
+                            marker.on('dragend', function(e) {
+                                var pos = e.target.getLatLng();
+                                Utils.updateCoordinateFields(params.latFieldId, params.lngFieldId, pos.lat, pos.lng);
+                                container.dispatchEvent(new CustomEvent('geocoding:marker-moved', {
+                                    bubbles: false, detail: { lat: pos.lat, lng: pos.lng }
+                                }));
+                            });
+                        }
+                    }
+
+                    // Bind popup with address label if provided
+                    if (d.label) {
+                        marker.unbindPopup();
+                        marker.bindPopup(d.label).openPopup();
+                    }
+
+                    Utils.updateCoordinateFields(params.latFieldId, params.lngFieldId, lat, lng);
+                    container.dispatchEvent(new CustomEvent('geocoding:marker-placed', {
+                        bubbles: false, detail: { lat: lat, lng: lng }
+                    }));
+                }
             });
 
             // Layer change: swap the tile layer
