@@ -345,6 +345,10 @@ class Address extends DataObject
     {
         $text = [];
 
+        if ($this->Name) {
+            $text[] = $this->Name;
+        }
+
         if ($this->AddressLine1) {
             $text[] = $this->AddressLine1;
         }
