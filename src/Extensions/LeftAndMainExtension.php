@@ -26,7 +26,7 @@ class LeftAndMainExtension extends Extension
      */
     public function init(): void
     {
-        Requirements::css('silverstripe-geocoding/client/admin/dist/address-grid.css');
+        Requirements::css('clesson-de/silverstripe-geocoding:client/admin/dist/address-grid.css');
     }
 
 }

@@ -92,7 +92,7 @@ class GoogleMapProvider implements MapProviderInterface
 
         return [
             'https://maps.googleapis.com/maps/api/js?key=' . $service->ApiKey,
-            'silverstripe-geocoding/client/admin/dist/google-map.js',
+            'clesson-de/silverstripe-geocoding:client/admin/dist/google-map.js',
         ];
     }
 

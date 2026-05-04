@@ -98,7 +98,7 @@ class OpenStreetMapProvider implements MapProviderInterface
     {
         return [
             'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-            'silverstripe-geocoding/client/admin/dist/osm-map.js',
+            'clesson-de/silverstripe-geocoding:client/admin/dist/osm-map.js',
         ];
     }
 

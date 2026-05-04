@@ -254,13 +254,13 @@ class AddressField extends FormField
     protected function addAssets(): void
     {
         // Map utilities (provider-agnostic)
-        Requirements::javascript('silverstripe-geocoding/client/admin/dist/map-utils.js');
-        Requirements::javascript('silverstripe-geocoding/client/admin/dist/map-entwine.js');
-        Requirements::css('silverstripe-geocoding/client/admin/dist/map-field.css');
+        Requirements::javascript('clesson-de/silverstripe-geocoding:client/admin/dist/map-utils.js');
+        Requirements::javascript('clesson-de/silverstripe-geocoding:client/admin/dist/map-entwine.js');
+        Requirements::css('clesson-de/silverstripe-geocoding:client/admin/dist/map-field.css');
 
         // AddressField-specific
-        Requirements::javascript('silverstripe-geocoding/client/admin/dist/address-field.js');
-        Requirements::css('silverstripe-geocoding/client/admin/dist/address-field.css');
+        Requirements::javascript('clesson-de/silverstripe-geocoding:client/admin/dist/address-field.js');
+        Requirements::css('clesson-de/silverstripe-geocoding:client/admin/dist/address-field.css');
 
         if ($this->provider !== null && $this->service !== null) {
             foreach ($this->provider->getCSSResources() as $css) {
