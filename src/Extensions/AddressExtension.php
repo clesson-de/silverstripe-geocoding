@@ -131,21 +131,31 @@ class AddressExtension extends Extension
             return;
         }
 
-        $coordinate = GeoCoder::geocode([
+        $result = GeoCoder::geocodeFull([
             'street'     => $owner->AddressLine1,
             'city'       => $owner->City,
             'postalCode' => $owner->PostalCode,
             'country'    => $owner->CountryCode,
         ]);
 
-        if ($coordinate === null) {
+        if ($result === null) {
             return;
         }
+
+        $coordinate = $result['coordinate'];
+        $placeName  = $result['placeName'];
 
         $this->isGeocodingWrite = true;
 
         $owner->GeoCoordinatesLatitude  = $coordinate->getLatitude();
         $owner->GeoCoordinatesLongitude = $coordinate->getLongitude();
+
+        // Auto-fill the Bezeichnung (Name) only when the geocoder found a named
+        // place (school, sports hall, …) and the field is currently empty.
+        if (empty($owner->Name) && $placeName !== null) {
+            $owner->Name = $placeName;
+        }
+
         $owner->write();
 
         $this->isGeocodingWrite = false;

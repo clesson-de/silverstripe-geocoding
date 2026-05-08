@@ -119,6 +119,23 @@ class GoogleService extends GeocodingService
      */
     public function geocode(array $address): ?DBGeoCoordinate
     {
+        $result = $this->geocodeFull($address);
+
+        return $result !== null ? $result['coordinate'] : null;
+    }
+
+    /**
+     * Resolves an address to geographic coordinates using the Google Geocoding API.
+     *
+     * The Google Geocoding API does not expose a place name in its response, so
+     * `placeName` is always null. The method signature mirrors OpenStreetMapService
+     * so that GeoCoder::geocodeFull() can dispatch to it uniformly.
+     *
+     * @param array $address Associative array with keys: street, city, postalCode, country.
+     * @return array{coordinate: DBGeoCoordinate, placeName: string|null}|null
+     */
+    public function geocodeFull(array $address): ?array
+    {
         $addressString = implode(', ', array_filter([
             $address['street']                                               ?? '',
             trim(($address['postalCode'] ?? '') . ' ' . ($address['city'] ?? '')),
@@ -144,7 +161,10 @@ class GoogleService extends GeocodingService
             $coordinate->setLatitude((float) $location['lat']);
             $coordinate->setLongitude((float) $location['lng']);
 
-            return $coordinate;
+            return [
+                'coordinate' => $coordinate,
+                'placeName'  => null,
+            ];
         } catch (Throwable) {
             return null;
         }

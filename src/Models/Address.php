@@ -2,17 +2,16 @@
 
 namespace Clesson\Silverstripe\Geocoding\Models;
 
-use ArgumentCountError;
 use CommerceGuys\Addressing\Address as CommerceAddress;
 use CommerceGuys\Addressing\AddressFormat\AddressFormatRepository;
 use CommerceGuys\Addressing\Country\CountryRepository;
 use CommerceGuys\Addressing\Formatter\DefaultFormatter;
 use CommerceGuys\Addressing\Subdivision\SubdivisionRepository;
+use Clesson\Silverstripe\Autocomplete\Forms\AutocompleteField;
 use SilverStripe\Core\Validation\ValidationResult;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\TextField;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\i18n\i18n;
 use SilverStripe\ORM\DataObject;
@@ -110,11 +109,11 @@ class Address extends DataObject
             return null;
         }
 
+        $locale = strtolower(explode('_', i18n::get_locale() ?: 'en')[0]);
         $countryRepository = new CountryRepository();
-        $country = $countryRepository->get($countryCode);
-        $locale = i18n::get_locale();
+        $country = $countryRepository->get($countryCode, $locale);
 
-        return $country->getName($locale);
+        return $country->getName();
     }
 
     /**
@@ -151,16 +150,19 @@ class Address extends DataObject
             'Summary',
         ]);
 
-        /** @var TextField $nameField */
-        $nameField = TextField::create('Name', $this->fieldLabel('Name'));
+        /** @var AutocompleteField $nameField */
+        $nameField = AutocompleteField::create('Name', $this->fieldLabel('Name'));
+        $nameField->setSourceModel(self::class, 'Name');
         $fields->addFieldToTab('Root.Main', $nameField);
 
-        /** @var TextField $addressLine1Field */
-        $addressLine1Field = TextField::create('AddressLine1', $this->fieldLabel('AddressLine1'));
+        /** @var AutocompleteField $addressLine1Field */
+        $addressLine1Field = AutocompleteField::create('AddressLine1', $this->fieldLabel('AddressLine1'));
+        $addressLine1Field->setSourceModel(self::class, 'AddressLine1');
         $fields->addFieldToTab('Root.Main', $addressLine1Field);
 
-        /** @var TextField $addressLine2Field */
-        $addressLine2Field = TextField::create('AddressLine2', $this->fieldLabel('AddressLine2'));
+        /** @var AutocompleteField $addressLine2Field */
+        $addressLine2Field = AutocompleteField::create('AddressLine2', $this->fieldLabel('AddressLine2'));
+        $addressLine2Field->setSourceModel(self::class, 'AddressLine2');
         $fields->addFieldToTab('Root.Main', $addressLine2Field);
 
         /** @var DropdownField $countryCodeField */
@@ -178,19 +180,22 @@ class Address extends DataObject
             $regionField->setAttribute('data-depends-on', 'CountryCode');
             $fields->addFieldToTab('Root.Main', $regionField);
         } else {
-            /** @var TextField $regionField */
-            $regionField = TextField::create('Region', $this->fieldLabel('Region'));
+            /** @var AutocompleteField $regionField */
+            $regionField = AutocompleteField::create('Region', $this->fieldLabel('Region'));
+            $regionField->setSourceModel(self::class, 'Region');
             $regionField->addExtraClass('address-region-field-text');
             $regionField->setAttribute('data-depends-on', 'CountryCode');
             $fields->addFieldToTab('Root.Main', $regionField);
         }
 
-        /** @var TextField $postalCodeField */
-        $postalCodeField = TextField::create('PostalCode', '');
+        /** @var AutocompleteField $postalCodeField */
+        $postalCodeField = AutocompleteField::create('PostalCode', '');
+        $postalCodeField->setSourceModel(self::class, 'PostalCode');
         $postalCodeField->setAttribute('placeholder', $this->fieldLabel('PostalCode'));
 
-        /** @var TextField $cityField */
-        $cityField = TextField::create('City', '');
+        /** @var AutocompleteField $cityField */
+        $cityField = AutocompleteField::create('City', '');
+        $cityField->setSourceModel(self::class, 'City');
         $cityField->setAttribute('placeholder', $this->fieldLabel('City'));
 
         /** @var FieldGroup $postalCodeCityGroup */
@@ -256,28 +261,11 @@ class Address extends DataObject
     public static function getCountryOptions(): array
     {
         $repo = new CountryRepository();
-        $locale = i18n::get_locale() ?: 'en';
+        $locale = strtolower(explode('_', i18n::get_locale() ?: 'en')[0]);
         $list = [];
 
-        foreach ($repo->getAll() as $code => $country) {
-            $name = $code;
-
-            if (method_exists($country, 'getName')) {
-                try {
-                    $name = $country->getName($locale);
-                } catch (ArgumentCountError $e) {
-                    $name = $country->getName();
-                } catch (Throwable $e) {
-                    $name = $code;
-                }
-            } elseif (method_exists($country, 'getNames')) {
-                $names = $country->getNames();
-                if (is_array($names)) {
-                    $name = $names[$locale] ?? $names['en'] ?? (reset($names) ?: $code);
-                }
-            }
-
-            $list[$code] = $name ?: $code;
+        foreach ($repo->getAll($locale) as $code => $country) {
+            $list[$code] = $country->getName() ?: $code;
         }
 
         natcasesort($list);

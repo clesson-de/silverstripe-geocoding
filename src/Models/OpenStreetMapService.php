@@ -134,6 +134,18 @@ class OpenStreetMapService extends GeocodingService
     }
 
     /**
+     * OSM classes that represent named places (amenity, leisure, building, …).
+     *
+     * A result whose `class` is in this list will have its `name` promoted to the
+     * Address `Name` (Bezeichnung) field automatically.
+     */
+    private const NAMED_PLACE_CLASSES = [
+        'amenity', 'leisure', 'building', 'shop', 'tourism',
+        'sport', 'healthcare', 'office', 'craft', 'emergency',
+        'military', 'religion', 'historic', 'club',
+    ];
+
+    /**
      * Resolves an address to geographic coordinates using the Nominatim API.
      *
      * Example: geocode(['street' => 'Unter den Linden 1', 'city' => 'Berlin', 'postalCode' => '10117', 'country' => 'DE'])
@@ -142,6 +154,26 @@ class OpenStreetMapService extends GeocodingService
      * @return DBGeoCoordinate|null Returns null if geocoding fails or no result is found.
      */
     public function geocode(array $address): ?DBGeoCoordinate
+    {
+        $result = $this->geocodeFull($address);
+
+        return $result !== null ? $result['coordinate'] : null;
+    }
+
+    /**
+     * Resolves an address to geographic coordinates and – for named places such as schools
+     * or sports halls – an optional place name using the Nominatim API.
+     *
+     * Returns an associative array with keys:
+     * - coordinate (DBGeoCoordinate)
+     * - placeName  (?string) – non-null only when the result is a named place
+     *
+     * Example: geocodeFull(['street' => 'Schulstraße 5', 'city' => 'Kirchheim', 'postalCode' => '73230', 'country' => 'DE'])
+     *
+     * @param array $address Associative array with keys: street, city, postalCode, country.
+     * @return array{coordinate: DBGeoCoordinate, placeName: string|null}|null
+     */
+    public function geocodeFull(array $address): ?array
     {
         $baseUrl = $this->BaseUrl ?: self::DEFAULT_NOMINATIM_BASE_URL;
 
@@ -152,7 +184,7 @@ class OpenStreetMapService extends GeocodingService
             $address['country']    ?? '',
         ]));
 
-        $url = $baseUrl . '/search?q=' . urlencode($query) . '&format=json&limit=1';
+        $url = $baseUrl . '/search?q=' . urlencode($query) . '&format=json&limit=1&addressdetails=1';
 
         try {
             $this->applyRateLimit();
@@ -169,10 +201,35 @@ class OpenStreetMapService extends GeocodingService
             $coordinate->setLatitude((float) $data[0]['lat']);
             $coordinate->setLongitude((float) $data[0]['lon']);
 
-            return $coordinate;
+            return [
+                'coordinate' => $coordinate,
+                'placeName'  => $this->extractPlaceName($data[0]),
+            ];
         } catch (Throwable) {
             return null;
         }
+    }
+
+    /**
+     * Extracts the place name from a Nominatim result entry.
+     *
+     * Returns the `name` field only when the result's OSM `class` indicates a
+     * named place (amenity, leisure, building, …). For plain street addresses
+     * the method returns null.
+     *
+     * @param array<string, mixed> $result A single Nominatim search result.
+     * @return string|null
+     */
+    private function extractPlaceName(array $result): ?string
+    {
+        $class = $result['class'] ?? '';
+        $name  = trim((string) ($result['name'] ?? ''));
+
+        if ($name !== '' && in_array($class, self::NAMED_PLACE_CLASSES, true)) {
+            return $name;
+        }
+
+        return null;
     }
 
     /**

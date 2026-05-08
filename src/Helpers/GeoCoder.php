@@ -48,6 +48,47 @@ class GeoCoder
     private const CACHE_NAMESPACE = 'geocoding_quota';
 
     /**
+     * Resolves an address to geographic coordinates and an optional place name.
+     *
+     * Behaves like geocode() but additionally returns the place name when the
+     * geocoding service found a named place (school, sports hall, hospital, …).
+     * Services that do not implement geocodeFull() fall back to geocode().
+     *
+     * Return array keys:
+     * - coordinate (DBGeoCoordinate)
+     * - placeName  (?string) — non-null only for named places
+     *
+     * Example: GeoCoder::geocodeFull(['street' => 'Schulstraße 5', 'city' => 'Kirchheim', 'postalCode' => '73230', 'country' => 'DE'])
+     *
+     * @param array $address Associative array with keys: street, city, postalCode, country.
+     * @return array{coordinate: DBGeoCoordinate, placeName: string|null}|null
+     */
+    public static function geocodeFull(array $address): ?array
+    {
+        foreach (self::getCandidates('geocode') as $service) {
+            if (!self::isQuotaAvailable($service, 'geocode')) {
+                continue;
+            }
+
+            if (method_exists($service, 'geocodeFull')) {
+                $result = $service->geocodeFull($address);
+            } else {
+                $coordinate = $service->geocode($address);
+                $result     = $coordinate !== null
+                    ? ['coordinate' => $coordinate, 'placeName' => null]
+                    : null;
+            }
+
+            if ($result !== null) {
+                self::incrementQuota($service, 'geocode');
+                return $result;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Resolves an address to geographic coordinates.
      *
      * Tries active services in descending GeocodePriority order.
