@@ -198,6 +198,7 @@ class GoogleService extends GeocodingService
             $route        = '';
             $city         = '';
             $postalCode   = '';
+            $region       = '';
             $country      = '';
 
             foreach ($components as $component) {
@@ -210,6 +211,8 @@ class GoogleService extends GeocodingService
                     $city = $component['long_name'];
                 } elseif (in_array('postal_code', $types, true)) {
                     $postalCode = $component['long_name'];
+                } elseif (in_array('administrative_area_level_1', $types, true)) {
+                    $region = $component['long_name'];
                 } elseif (in_array('country', $types, true)) {
                     $country = $component['short_name'];
                 }
@@ -219,6 +222,7 @@ class GoogleService extends GeocodingService
                 'street'     => trim($streetNumber ? $route . ' ' . $streetNumber : $route),
                 'city'       => $city,
                 'postalCode' => $postalCode,
+                'region'     => $region,
                 'country'    => $country,
             ];
         } catch (Throwable) {

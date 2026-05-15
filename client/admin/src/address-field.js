@@ -47,15 +47,29 @@
     }
 
     /**
-     * Fetches address suggestions for a query string.
+     * Fetches geocoding suggestions for a query string.
      * @param {string} suggestUrl
      * @param {string} query
      * @returns {Promise<Array>}
      */
     function fetchSuggestions(suggestUrl, query) {
         return fetch(suggestUrl + '?q=' + encodeURIComponent(query) + '&limit=6', {
+            credentials: 'same-origin',
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        }).then(function (r) { return r.json(); });
+        }).then(function (r) { return r.json(); }).catch(function () { return []; });
+    }
+
+    /**
+     * Searches existing Address records in the database.
+     * @param {string} searchUrl
+     * @param {string} query
+     * @returns {Promise<Array>}
+     */
+    function fetchAddressRecords(searchUrl, query) {
+        return fetch(searchUrl + '?q=' + encodeURIComponent(query) + '&limit=5', {
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        }).then(function (r) { return r.json(); }).catch(function () { return []; });
     }
 
     /* ------------------------------------------------------------------ */
@@ -64,7 +78,8 @@
 
     /**
      * Moves the modal element to <body> so it is not clipped by overflow:hidden parents.
-     * Stores the originating field ID on the modal for reconnection.
+     * Removes any stale modal already present in <body> for this field ID (can occur
+     * when Silverstripe CMS replaces a form via AJAX without triggering onunmatch).
      * @param {jQuery} $field
      * @returns {jQuery} the detached-and-appended modal
      */
@@ -72,28 +87,29 @@
         var $modal = $field.find('.address-field-modal');
         if ($modal.length === 0) { return $(); }
 
-        $modal.data('address-field-id', $field.attr('id'));
+        var fieldId = $field.attr('id');
+
+        // Remove any leftover modal that was not cleaned up by onunmatch
+        $('body').children('.address-field-modal[data-field-id="' + fieldId + '"]').remove();
+
+        $modal.data('address-field-id', fieldId);
         $('body').append($modal.detach());
         return $modal;
     }
 
     /**
-     * Fires geocoding:resize repeatedly until the map container has a real size.
-     * Leaflet needs this when the container was hidden (display:none) during init.
+     * Fires geocoding:resize several times after the modal opens so Leaflet
+     * can recalculate tile coverage once the container has real dimensions.
      * @param {HTMLElement} mapEl
      */
     function ensureMapSize(mapEl) {
-        var attempts = 0;
-        var maxAttempts = 10;
-        function check() {
-            attempts++;
-            mapEl.dispatchEvent(new CustomEvent('geocoding:resize', { bubbles: false }));
-            if (attempts < maxAttempts && (mapEl.offsetWidth === 0 || mapEl.offsetHeight === 0)) {
-                setTimeout(check, 100);
-            }
-        }
-        // First attempt after a short delay to let CSS kick in
-        setTimeout(check, 50);
+        // Fire immediately and again after short intervals to handle render timing
+        var delays = [50, 150, 350, 700];
+        delays.forEach(function (ms) {
+            setTimeout(function () {
+                mapEl.dispatchEvent(new CustomEvent('geocoding:resize', { bubbles: false }));
+            }, ms);
+        });
     }
 
     /**
@@ -166,6 +182,7 @@
         $modal.hide();
         document.body.classList.remove('address-field-modal--open');
         $modal.find('.address-field-search__input').val('');
+        $modal.find('.address-field-search__spinner').hide();
         $modal.find('.address-field-search__suggestions').hide().empty();
         $modal.find('.address-field-modal__lat').val('');
         $modal.find('.address-field-modal__lng').val('');
@@ -187,10 +204,11 @@
 
         // Show the clear button if not yet visible
         if (!$field.find('.address-field__btn--clear').length) {
-            $field.find('.address-field__actions').append(
-                $('<button type="button" class="address-field__btn address-field__btn--clear btn btn-outline-danger btn-sm">')
-                    .text($field.data('label-clear') || 'Adresse entfernen')
-            );
+            var $clearBtn = $('<button type="button" class="address-field__btn address-field__btn--clear btn btn-outline-danger btn-sm">');
+            $clearBtn.attr('title', $field.data('label-clear') || 'Adresse entfernen');
+            $clearBtn.attr('aria-label', $field.data('label-clear') || 'Adresse entfernen');
+            $clearBtn.append($('<span class="font-icon-cancel" aria-hidden="true">'));
+            $field.find('.address-field__actions').append($clearBtn);
         }
     }
 
@@ -199,31 +217,74 @@
     /* ------------------------------------------------------------------ */
 
     /**
-     * Renders suggestion items into the dropdown list.
+     * Renders a group header into the suggestions list.
      * @param {jQuery} $list
-     * @param {Array}  suggestions
-     * @param {object} opts  { onPick }
+     * @param {string} label
      */
-    function renderSuggestions($list, suggestions, opts) {
+    function renderGroupHeader($list, label) {
+        $list.append(
+            $('<li class="address-field-search__group-header" aria-disabled="true">').text(label)
+        );
+    }
+
+    /**
+     * Renders combined results from DB records and geocoding suggestions.
+     * DB records are shown first (different styling), geocoding suggestions second.
+     *
+     * @param {jQuery} $list
+     * @param {Array}  records       Existing Address records: { id, title, summary, lat, lng }
+     * @param {Array}  suggestions   Geocoding suggestions:    { label, street, city, ... lat, lng }
+     * @param {object} opts          { onPickRecord, onPickSuggestion }
+     */
+    function renderCombinedSuggestions($list, records, suggestions, opts) {
         $list.empty();
 
-        if (!suggestions || !suggestions.length) {
+        var hasRecords     = records && records.length > 0;
+        var hasSuggestions = suggestions && suggestions.length > 0;
+
+        if (!hasRecords && !hasSuggestions) {
             $list.append($('<li class="address-field-search__no-results">').text('Keine Ergebnisse'));
             $list.show();
             return;
         }
 
-        suggestions.forEach(function (s) {
-            var $li = $('<li class="address-field-search__suggestion" role="option" tabindex="0">').text(s.label);
-            $li.on('click keydown', function (e) {
-                if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    $list.hide().empty();
-                    opts.onPick(s);
+        // --- Existing Address records ------------------------------------
+        if (hasRecords) {
+            renderGroupHeader($list, 'Gespeicherte Adressen');
+            records.forEach(function (record) {
+                var $li = $('<li class="address-field-search__suggestion address-field-search__suggestion--record" role="option" tabindex="0">');
+                var $title   = $('<span class="address-field-search__suggestion-title">').text(record.title || record.summary || '–');
+                var $summary = $('<span class="address-field-search__suggestion-summary">').text(record.title ? record.summary : '');
+                $li.append($title);
+                if (record.title && record.summary && record.summary !== record.title) {
+                    $li.append($summary);
                 }
+                $li.on('click keydown', function (e) {
+                    if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        $list.hide().empty();
+                        opts.onPickRecord(record);
+                    }
+                });
+                $list.append($li);
             });
-            $list.append($li);
-        });
+        }
+
+        // --- Geocoding suggestions ---------------------------------------
+        if (hasSuggestions) {
+            renderGroupHeader($list, 'Geocoding-Vorschläge');
+            suggestions.forEach(function (s) {
+                var $li = $('<li class="address-field-search__suggestion address-field-search__suggestion--geocoding" role="option" tabindex="0">').text(s.label);
+                $li.on('click keydown', function (e) {
+                    if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        $list.hide().empty();
+                        opts.onPickSuggestion(s);
+                    }
+                });
+                $list.append($li);
+            });
+        }
 
         $list.show();
     }
@@ -260,9 +321,10 @@
             _bindModal: function ($modal) {
                 if (!$modal || !$modal.length) { return; }
 
-                var self     = this;
-                var fieldId  = self.attr('id');
+                var self       = this;
+                var fieldId    = self.attr('id');
                 var suggestUrl = self.data('suggest-url');
+                var searchUrl  = self.data('search-url');
                 var createUrl  = self.data('create-url');
 
                 /* --- Close triggers ------------------------------------ */
@@ -273,16 +335,56 @@
                 /* --- Search input -------------------------------------- */
                 var $searchInput = $modal.find('.address-field-search__input');
                 var $suggestions = $modal.find('.address-field-search__suggestions');
+                var $spinner     = $modal.find('.address-field-search__spinner');
 
                 $searchInput.on('input', debounce(function () {
                     var query = $searchInput.val().trim();
                     if (query.length < 2) {
                         $suggestions.hide().empty();
+                        $spinner.hide();
                         return;
                     }
-                    fetchSuggestions(suggestUrl, query).then(function (data) {
-                        renderSuggestions($suggestions, data, {
-                            onPick: function (suggestion) {
+
+                    $spinner.show();
+                    $suggestions.hide().empty();
+
+                    Promise.all([
+                        fetchAddressRecords(searchUrl, query),
+                        fetchSuggestions(suggestUrl, query),
+                    ]).then(function (results) {
+                        $spinner.hide();
+                        var records     = Array.isArray(results[0]) ? results[0] : [];
+                        var geocodings  = Array.isArray(results[1]) ? results[1] : [];
+
+                        renderCombinedSuggestions($suggestions, records, geocodings, {
+
+                            onPickRecord: function (record) {
+                                // Existing address — apply directly, no need to create
+                                $searchInput.val(record.title || record.summary || '');
+                                applySelection(fieldId, {
+                                    id:    record.id,
+                                    title: record.title || record.summary || '',
+                                    lat:   record.lat,
+                                    lng:   record.lng,
+                                });
+
+                                // Show lock icon
+                                var $modal2 = $('body').children('.address-field-modal[data-field-id="' + fieldId + '"]');
+                                $modal2.find('.address-field-modal__locked').removeClass('address-field-modal__locked--hidden');
+
+                                // Pan map if coordinates are present
+                                var $mapContainer = $modal.find('.geocoding-map-container');
+                                if ($mapContainer.length && record.lat && record.lng) {
+                                    $mapContainer[0].dispatchEvent(new CustomEvent('geocoding:pan-to', {
+                                        bubbles: false,
+                                        detail: { lat: record.lat, lng: record.lng, zoom: 15, placeMarker: true, label: record.title || record.summary || '' },
+                                    }));
+                                }
+
+                                closeModal($modal);
+                            },
+
+                            onPickSuggestion: function (suggestion) {
                                 $searchInput.val(suggestion.label);
                                 $modal.data('pending', { source: 'suggestion', suggestion: suggestion });
                                 $modal.find('.address-field-modal__accept').prop('disabled', false);
@@ -350,7 +452,8 @@
                 e.preventDefault();
                 var $field  = this.closest('.address-field');
                 var fieldId = $field.attr('id');
-                var $modal  = $('.address-field-modal[data-field-id="' + fieldId + '"]');
+                // Use .first() as a safety net — there should only ever be one modal per field
+                var $modal  = $('.address-field-modal[data-field-id="' + fieldId + '"]').first();
                 if ($modal.length) { openModal($field, $modal); }
             },
         });

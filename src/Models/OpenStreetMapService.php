@@ -264,6 +264,7 @@ class OpenStreetMapService extends GeocodingService
                 'street'     => $addr['road']         ?? '',
                 'city'       => $addr['city']         ?? ($addr['town'] ?? ($addr['village'] ?? '')),
                 'postalCode' => $addr['postcode']     ?? '',
+                'region'     => $addr['state']        ?? '',
                 'country'    => $addr['country_code'] ?? '',
             ];
         } catch (Throwable) {
@@ -364,6 +365,7 @@ class OpenStreetMapService extends GeocodingService
                     'housenumber' => $housenumber,
                     'city'        => $addr['city'] ?? ($addr['town'] ?? ($addr['village'] ?? '')),
                     'postalCode'  => $addr['postcode'] ?? '',
+                    'region'      => $addr['state'] ?? '',
                     'country'     => strtoupper($addr['country_code'] ?? ''),
                 ];
             }

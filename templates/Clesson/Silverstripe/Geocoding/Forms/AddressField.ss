@@ -1,6 +1,7 @@
 <div class="address-field"
      id="$ID"
      data-suggest-url="$SuggestUrl"
+     data-search-url="$SearchUrl"
      data-create-url="$CreateUrl"
      data-provider="$Provider"
      data-provider-config="$ProviderConfig.ATT"
@@ -20,12 +21,18 @@
             <% if AddressTitle %>$AddressTitle<% else %>–<% end_if %>
         </span>
         <div class="address-field__actions">
-            <button type="button" class="address-field__btn address-field__btn--change btn btn-outline-secondary btn-sm">
-                $LabelChange
+            <button type="button"
+                    class="address-field__btn address-field__btn--change btn btn-outline-secondary btn-sm"
+                    title="$LabelChange"
+                    aria-label="$LabelChange">
+                <span class="font-icon-search" aria-hidden="true"></span>
             </button>
             <% if AddressTitle %>
-            <button type="button" class="address-field__btn address-field__btn--clear btn btn-outline-danger btn-sm">
-                $LabelClear
+            <button type="button"
+                    class="address-field__btn address-field__btn--clear btn btn-outline-danger btn-sm"
+                    title="$LabelClear"
+                    aria-label="$LabelClear">
+                <span class="font-icon-cancel" aria-hidden="true"></span>
             </button>
             <% end_if %>
         </div>
@@ -37,7 +44,11 @@
         <div class="address-field-modal__dialog">
 
             <div class="address-field-modal__header">
-                <span>$Title</span>
+                <span class="address-field-modal__title">
+                    $Title
+                    <span class="address-field-modal__locked font-icon-lock<% if not AddressTitle %> address-field-modal__locked--hidden<% end_if %>"
+                          title="$LabelAddressLocked"></span>
+                </span>
                 <button type="button" class="address-field-modal__close" aria-label="$LabelCancel">✕</button>
             </div>
 
@@ -45,10 +56,13 @@
 
                 <%-- Search --%>
                 <div class="address-field-search">
-                    <input type="text"
-                           class="address-field-search__input form-control"
-                           placeholder="$LabelSearch"
-                           autocomplete="off" />
+                    <div class="address-field-search__input-wrap">
+                        <input type="text"
+                               class="address-field-search__input form-control no-change-track"
+                               placeholder="$LabelSearch"
+                               autocomplete="off" />
+                        <span class="address-field-search__spinner" aria-hidden="true" style="display:none"></span>
+                    </div>
                     <ul class="address-field-search__suggestions" style="display:none"></ul>
                 </div>
 

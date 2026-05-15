@@ -61,6 +61,7 @@ en:
     CANCEL: 'Cancel'
     MAP_HINT: 'Double-click the map to place a marker, then click "Accept".'
     NO_PROVIDER: 'No map provider configured.'
+    ADDRESS_LOCKED: 'Address selected'
 
   Clesson\Silverstripe\Geocoding\Models\GeocodingService:
     SINGULARNAME: 'Geocoding service'

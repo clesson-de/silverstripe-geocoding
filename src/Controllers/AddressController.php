@@ -7,6 +7,7 @@ namespace Clesson\Silverstripe\Geocoding\Controllers;
 use Clesson\Silverstripe\Geocoding\Helpers\GeoCoder;
 use Clesson\Silverstripe\Geocoding\Models\Address;
 use SilverStripe\Control\Controller;
+use SilverStripe\Core\Convert;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Security\Permission;
@@ -29,6 +30,7 @@ class AddressController extends Controller
     private static array $allowed_actions = [
         'regions',
         'suggest',
+        'searchRecords',
         'createAddress',
     ];
 
@@ -92,6 +94,64 @@ class AddressController extends Controller
     }
 
     /**
+     * Searches existing Address records by name, address line, city, postal code or summary.
+     *
+     * URL example: /geocoding-api/address/searchRecords?q=Berlin&limit=5
+     *
+     * Response: array of { id, title, summary, lat, lng }
+     *
+     * @param HTTPRequest $request
+     * @return HTTPResponse
+     */
+    public function searchRecords(HTTPRequest $request): HTTPResponse
+    {
+        if (!Permission::check('CMS_ACCESS', 'any', Security::getCurrentUser())) {
+            return $this->jsonResponse(['error' => 'Access denied'], 403);
+        }
+
+        $query = trim((string) $request->getVar('q'));
+        $limit = max(1, min(10, (int) ($request->getVar('limit') ?: 5)));
+
+        if (strlen($query) < 2) {
+            return $this->jsonResponse([]);
+        }
+
+        $safe = Convert::raw2sql($query);
+        $like = '%' . $safe . '%';
+
+        $addresses = Address::get()
+            ->where(
+                "\"Name\" LIKE '{$like}'"
+                . " OR \"AddressLine1\" LIKE '{$like}'"
+                . " OR \"City\" LIKE '{$like}'"
+                . " OR \"PostalCode\" LIKE '{$like}'"
+                . " OR \"Summary\" LIKE '{$like}'"
+            )
+            ->limit($limit);
+
+        $results = [];
+        foreach ($addresses as $address) {
+            $lat = null;
+            $lng = null;
+            $geo = $address->dbObject('GeoCoordinates');
+            if ($geo && $geo->getLatitude() !== null && $geo->getLongitude() !== null) {
+                $lat = $geo->getLatitude();
+                $lng = $geo->getLongitude();
+            }
+
+            $results[] = [
+                'id'      => $address->ID,
+                'title'   => $address->getTitle() ?: $address->Name,
+                'summary' => (string) $address->Summary,
+                'lat'     => $lat,
+                'lng'     => $lng,
+            ];
+        }
+
+        return $this->jsonResponse($results);
+    }
+
+    /**
      * Creates an Address model from structured data or coordinates and returns its ID.
      *
      * POST body (JSON):
@@ -151,10 +211,10 @@ class AddressController extends Controller
 
         /** @var Address $address */
         $address              = Address::create();
-        $address->Name        = $body['label'] ?? '';
         $address->AddressLine1 = $body['street'] ?? '';
         $address->City        = $body['city'] ?? '';
         $address->PostalCode  = $body['postalCode'] ?? '';
+        $address->Region      = $body['region'] ?? '';
         $address->CountryCode = strtoupper($body['country'] ?? '');
         $address->write();
 
@@ -195,12 +255,8 @@ class AddressController extends Controller
             $address->AddressLine1 = $data['street'] ?? '';
             $address->City         = $data['city'] ?? '';
             $address->PostalCode   = $data['postalCode'] ?? '';
+            $address->Region       = $data['region'] ?? '';
             $address->CountryCode  = strtoupper($data['country'] ?? '');
-            $address->Name         = implode(', ', array_filter([
-                $address->AddressLine1,
-                $address->PostalCode . ' ' . $address->City,
-                $address->CountryCode,
-            ]));
         }
 
         $address->write();

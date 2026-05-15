@@ -32,8 +32,19 @@
 
     .address-field__actions {
         display: flex;
-        gap:     8px;
+        gap:     4px;
         flex-shrink: 0;
+
+        .address-field__btn {
+            display:         inline-flex;
+            align-items:     center;
+            justify-content: center;
+            width:           30px;
+            height:          30px;
+            padding:         0;
+            font-size:       14px;
+            line-height:     1;
+        }
     }
 }
 
@@ -83,6 +94,19 @@ body.address-field-modal--open {
         flex-shrink:     0;
     }
 
+    .address-field-modal__title {
+        display:     flex;
+        align-items: center;
+        gap:         8px;
+    }
+
+    .address-field-modal__locked {
+        font-size: 16px;
+        color:     #1d6fa4;
+
+        &--hidden { display: none; }
+    }
+
     .address-field-modal__close {
         background:  none;
         border:      none;
@@ -120,10 +144,29 @@ body.address-field-modal--open {
 
 .address-field-search {
     position: relative;
+    z-index:  20;
 
-    .address-field-search__input {
-        width:      100%;
-        box-sizing: border-box;
+    .address-field-search__input-wrap {
+        position: relative;
+
+        .address-field-search__input {
+            width:      100%;
+            box-sizing: border-box;
+            padding-right: 36px; // space for spinner
+        }
+
+        .address-field-search__spinner {
+            position:      absolute;
+            right:         10px;
+            top:           50%;
+            transform:     translateY(-50%);
+            width:         16px;
+            height:        16px;
+            border:        2px solid #ccc;
+            border-top:    2px solid #1d6fa4;
+            border-radius: 50%;
+            animation:     address-field-spin 0.7s linear infinite;
+        }
     }
 
     .address-field-search__suggestions {
@@ -131,7 +174,7 @@ body.address-field-modal--open {
         top:        100%;
         left:       0;
         right:      0;
-        z-index:    10;
+        z-index:    30;
         background: #fff;
         border:     1px solid #ccc;
         border-top: none;
@@ -142,6 +185,23 @@ body.address-field-modal--open {
         padding:    0;
         max-height: 220px;
         overflow-y: auto;
+    }
+
+    .address-field-search__group-header {
+        padding:     6px 12px 4px;
+        font-size:   11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color:       #888;
+        background:  #f7f7f7;
+        border-top:  1px solid #eee;
+        cursor:      default;
+        user-select: none;
+
+        &:first-child {
+            border-top: none;
+        }
     }
 
     .address-field-search__suggestion,
@@ -156,6 +216,41 @@ body.address-field-modal--open {
     .address-field-search__suggestion:focus {
         background: #f0f4ff;
         outline:    none;
+    }
+
+    // Existing Address records — slightly different look
+    .address-field-search__suggestion--record {
+        display:        flex;
+        flex-direction: column;
+        gap:            1px;
+        padding-left:   14px;
+        border-left:    3px solid #1d6fa4;
+
+        .address-field-search__suggestion-title {
+            font-weight: 500;
+            color:       #1a1a1a;
+        }
+
+        .address-field-search__suggestion-summary {
+            font-size: 11px;
+            color:     #777;
+        }
+
+        &:hover,
+        &:focus {
+            background:  #eaf3fb;
+            border-left-color: #155d8a;
+        }
+    }
+
+    // Geocoding results — standard look
+    .address-field-search__suggestion--geocoding {
+        color: #444;
+
+        &:hover,
+        &:focus {
+            background: #f0f4ff;
+        }
     }
 
     .address-field-search__no-results {
@@ -175,6 +270,9 @@ body.address-field-modal--open {
 }
 
 .address-field-map-wrap {
+    position: relative;
+    z-index:  1;
+
     .geocoding-map-container {
         width:         100%;
         height:        320px;
@@ -184,3 +282,6 @@ body.address-field-modal--open {
     }
 }
 
+@keyframes address-field-spin {
+    to { transform: translateY(-50%) rotate(360deg); }
+}

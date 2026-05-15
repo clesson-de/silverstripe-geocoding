@@ -61,6 +61,7 @@ de:
     CANCEL: 'Abbrechen'
     MAP_HINT: 'Doppelklick auf die Karte, um einen Marker zu setzen, dann „Übernehmen" klicken.'
     NO_PROVIDER: 'Kein Kartenanbieter konfiguriert.'
+    ADDRESS_LOCKED: 'Adresse ausgewählt'
 
   Clesson\Silverstripe\Geocoding\Models\GeocodingService:
     SINGULARNAME: 'Geokodierungsdienst'

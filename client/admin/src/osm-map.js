@@ -17,6 +17,23 @@
     const Utils = window.GeocodingMapUtils;
 
     /**
+     * Fits the map view to all known coordinate points (route, markers).
+     * Calls invalidateSize() beforehand so Leaflet uses the correct container dimensions.
+     *
+     * @param {L.Map} map
+     * @param {Object} params  Return value of Utils.getMapParameters()
+     */
+    function fitBoundsToParams(map, params) {
+        const points = Utils.collectAllLatLngs(params);
+        if (points.length > 1) {
+            const latLngs = points.map(function(p) { return [p.lat, p.lng]; });
+            map.fitBounds(L.latLngBounds(latLngs), { padding: [32, 32] });
+        } else if (points.length === 1) {
+            map.setView([points[0].lat, points[0].lng], params.markerZoom || 15);
+        }
+    }
+
+    /**
      * Initializes a single OpenStreetMap container.
      *
      * @param {HTMLElement} container
@@ -152,16 +169,29 @@
             }
         }
 
-        // --- Fit bounds ---
+        // --- Fit bounds after init ---
+        // Deferred so Leaflet has a real container size after the tab/modal has settled.
         if (params.fitBounds) {
-            const points = Utils.collectAllLatLngs(params);
-            if (points.length > 1) {
-                const latLngs = points.map(function(p) { return [p.lat, p.lng]; });
-                map.fitBounds(L.latLngBounds(latLngs), { padding: [32, 32] });
-            } else if (points.length === 1) {
-                map.setView([points[0].lat, points[0].lng], params.markerZoom);
-            }
+            setTimeout(function() {
+                map.invalidateSize();
+                fitBoundsToParams(map, params);
+            }, 150);
         }
+
+        // Resize event: invalidate Leaflet's size after the container resizes (e.g. fullscreen)
+        container.addEventListener('geocoding:resize', function() {
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 50);
+        });
+
+        // Fit-bounds event: re-run invalidateSize + fitBounds (e.g. when a tab becomes visible)
+        container.addEventListener('geocoding:fit-bounds', function() {
+            setTimeout(function() {
+                map.invalidateSize();
+                fitBoundsToParams(map, params);
+            }, 50);
+        });
 
         // Only attach editing interactions when placing is allowed
         if (params.allowPlaceMarker) {
@@ -202,12 +232,6 @@
             }
         });
 
-        // Resize event: invalidate Leaflet's size after the container resizes (e.g. fullscreen)
-        container.addEventListener('geocoding:resize', function() {
-            setTimeout(function() {
-                map.invalidateSize();
-            }, 50);
-        });
 
         // Pan-to event: move map to given coordinates, optionally place a marker with popup
         container.addEventListener('geocoding:pan-to', function(event) {

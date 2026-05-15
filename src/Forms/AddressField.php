@@ -233,6 +233,7 @@ class AddressField extends FormField
             'DefaultLatitude'    => self::config()->get('default_latitude'),
             'DefaultLongitude'   => self::config()->get('default_longitude'),
             'SuggestUrl'         => '/geocoding-api/address/suggest',
+            'SearchUrl'          => '/geocoding-api/address/searchRecords',
             'CreateUrl'          => '/geocoding-api/address/createAddress',
             'LabelSearch'        => _t(__CLASS__ . '.SEARCH_PLACEHOLDER', 'Search address…'),
             'LabelChange'        => _t(__CLASS__ . '.CHANGE', 'Select address'),
@@ -241,6 +242,7 @@ class AddressField extends FormField
             'LabelCancel'        => _t(__CLASS__ . '.CANCEL', 'Cancel'),
             'LabelMapHint'       => _t(__CLASS__ . '.MAP_HINT', 'Double-click the map to place a marker, then click "Accept".'),
             'LabelNoProvider'    => _t(__CLASS__ . '.NO_PROVIDER', 'No map provider configured.'),
+            'LabelAddressLocked' => _t(__CLASS__ . '.ADDRESS_LOCKED', 'Address selected'),
         ]);
 
         return parent::Field($properties)->getValue();
