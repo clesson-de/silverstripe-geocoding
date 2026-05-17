@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Clesson\Silverstripe\Geocoding\Models;
 
 use CommerceGuys\Addressing\Address as CommerceAddress;
@@ -8,6 +10,9 @@ use CommerceGuys\Addressing\Country\CountryRepository;
 use CommerceGuys\Addressing\Formatter\DefaultFormatter;
 use CommerceGuys\Addressing\Subdivision\SubdivisionRepository;
 use Clesson\Silverstripe\Autocomplete\Forms\AutocompleteField;
+use Clesson\Silverstripe\Geocoding\Forms\MapField;
+use Clesson\Silverstripe\Geocoding\Helpers\GeoCoder;
+use Clesson\Silverstripe\Geocoding\ORM\DBGeoCoordinate;
 use SilverStripe\Core\Validation\ValidationResult;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldGroup;
@@ -29,6 +34,9 @@ use Psr\Log\LoggerInterface;
  * @property string $Region
  * @property string $CountryCode
  * @property string $Summary
+ * @property float  $GeoCoordinatesLatitude
+ * @property float  $GeoCoordinatesLongitude
+ * @property-read DBGeoCoordinate $GeoCoordinates
  * @property-read string $Country The full localised country name derived from CountryCode.
  *
  * @package Clesson\Silverstripe\Geocoding
@@ -55,14 +63,15 @@ class Address extends DataObject
      * @inheritdoc
      */
     private static $db = [
-        'Name'         => 'Varchar(255)',
-        'AddressLine1' => 'Varchar(150)',
-        'AddressLine2' => 'Varchar(150)',
-        'PostalCode'   => 'Varchar(20)',
-        'City'         => 'Varchar(100)',
-        'Region'       => 'Varchar(100)',
-        'CountryCode'  => 'Varchar(2)',
-        'Summary'      => 'Text',
+        'Name'                  => 'Varchar(255)',
+        'AddressLine1'          => 'Varchar(150)',
+        'AddressLine2'          => 'Varchar(150)',
+        'PostalCode'            => 'Varchar(20)',
+        'City'                  => 'Varchar(100)',
+        'Region'                => 'Varchar(100)',
+        'CountryCode'           => 'Varchar(2)',
+        'Summary'               => 'Text',
+        'GeoCoordinates'        => 'Clesson\Silverstripe\Geocoding\ORM\DBGeoCoordinate',
     ];
 
     /**
@@ -80,18 +89,21 @@ class Address extends DataObject
     public function fieldLabels($includerelations = true): array
     {
         $labels = parent::fieldLabels($includerelations);
-        $labels['Name']         = _t(__CLASS__ . '.NAME', 'Label');
-        $labels['AddressLine1'] = _t(__CLASS__ . '.ADDRESS_LINE_1', 'Address line 1');
-        $labels['AddressLine2'] = _t(__CLASS__ . '.ADDRESS_LINE_2', 'Address line 2');
-        $labels['City']         = _t(__CLASS__ . '.CITY', 'City');
-        $labels['PostalCode']   = _t(__CLASS__ . '.POSTAL_CODE', 'Postal code');
-        $labels['Region']       = _t(__CLASS__ . '.REGION', 'Region');
-        $labels['CountryCode']  = _t(__CLASS__ . '.COUNTRY_CODE', 'Country');
-        $labels['Country']      = _t(__CLASS__ . '.COUNTRY_CODE', 'Country');
-        $labels['Summary']      = _t(__CLASS__ . '.SUMMARY', 'Full address');
-        $labels['Created']      = _t('Clesson\Silverstripe\Geocoding\Common.CREATED', 'Created');
-        $labels['LastEdited']   = _t('Clesson\Silverstripe\Geocoding\Common.LAST_EDITED', 'Last edited');
-        $labels['ID']           = _t('Clesson\Silverstripe\Geocoding\Common.ID', 'ID');
+        $labels['Name']                    = _t(__CLASS__ . '.NAME', 'Label');
+        $labels['AddressLine1']            = _t(__CLASS__ . '.ADDRESS_LINE_1', 'Address line 1');
+        $labels['AddressLine2']            = _t(__CLASS__ . '.ADDRESS_LINE_2', 'Address line 2');
+        $labels['City']                    = _t(__CLASS__ . '.CITY', 'City');
+        $labels['PostalCode']              = _t(__CLASS__ . '.POSTAL_CODE', 'Postal code');
+        $labels['Region']                  = _t(__CLASS__ . '.REGION', 'Region');
+        $labels['CountryCode']             = _t(__CLASS__ . '.COUNTRY_CODE', 'Country');
+        $labels['Country']                 = _t(__CLASS__ . '.COUNTRY_CODE', 'Country');
+        $labels['Summary']                 = _t(__CLASS__ . '.SUMMARY', 'Full address');
+        $labels['GeoCoordinates']          = _t(__CLASS__ . '.GEO_COORDINATES', 'Geo coordinates');
+        $labels['GeoCoordinatesLatitude']  = _t(__CLASS__ . '.LATITUDE', 'Latitude');
+        $labels['GeoCoordinatesLongitude'] = _t(__CLASS__ . '.LONGITUDE', 'Longitude');
+        $labels['Created']                 = _t('Clesson\Silverstripe\Geocoding\Common.CREATED', 'Created');
+        $labels['LastEdited']              = _t('Clesson\Silverstripe\Geocoding\Common.LAST_EDITED', 'Last edited');
+        $labels['ID']                      = _t('Clesson\Silverstripe\Geocoding\Common.ID', 'ID');
 
         return $labels;
     }
@@ -148,6 +160,8 @@ class Address extends DataObject
             'Region',
             'CountryCode',
             'Summary',
+            'GeoCoordinatesLatitude',
+            'GeoCoordinatesLongitude',
         ]);
 
         /** @var AutocompleteField $nameField */
@@ -206,6 +220,15 @@ class Address extends DataObject
         );
         $fields->addFieldToTab('Root.Main', $postalCodeCityGroup);
 
+        /** @var MapField $geoCoordinatesField */
+        $geoCoordinatesField = MapField::create('GeoCoordinates', '');
+        $geoCoordinatesField->setValue($this->dbObject('GeoCoordinates'));
+        $geoCoordinatesField->setZoomLevel(6);
+        $geoCoordinatesField->setZoomLevelWithMarker(16);
+        // The marker is always set by the geocoder — manual placement is not allowed.
+        $geoCoordinatesField->setAllowPlaceMarker(false);
+        $fields->addFieldToTab('Root.Main', $geoCoordinatesField);
+
         return $fields;
     }
 
@@ -250,6 +273,85 @@ class Address extends DataObject
         }
 
         $this->Summary = $summary;
+    }
+
+    /**
+     * Guard flag to prevent recursive writes triggered by onAfterWrite.
+     */
+    private bool $isGeocodingWrite = false;
+
+    /**
+     * Address fields that trigger a new geocoding run when they change.
+     */
+    private const GEOCODING_FIELDS = ['AddressLine1', 'City', 'PostalCode', 'CountryCode'];
+
+    /**
+     * Automatically resolves geo coordinates from the address data after each write.
+     *
+     * Geocoding is triggered when:
+     * - at least AddressLine1 and City are filled in, AND
+     * - the record is new (first write), OR
+     * - at least one of the relevant address fields (AddressLine1, City,
+     *   PostalCode, CountryCode) has changed compared to the previous version.
+     *
+     * @return void
+     */
+    public function onAfterWrite(): void
+    {
+        parent::onAfterWrite();
+
+        if ($this->isGeocodingWrite) {
+            return;
+        }
+
+        if (empty($this->AddressLine1) || empty($this->City)) {
+            return;
+        }
+
+        $shouldGeocode = false;
+
+        if ($this->Version <= 1) {
+            $shouldGeocode = true;
+        } else {
+            foreach (self::GEOCODING_FIELDS as $field) {
+                if ($this->isChanged($field)) {
+                    $shouldGeocode = true;
+                    break;
+                }
+            }
+        }
+
+        if (!$shouldGeocode) {
+            return;
+        }
+
+        $result = GeoCoder::geocodeFull([
+            'street'     => $this->AddressLine1,
+            'city'       => $this->City,
+            'postalCode' => $this->PostalCode,
+            'country'    => $this->CountryCode,
+        ]);
+
+        if ($result === null) {
+            return;
+        }
+
+        $coordinate = $result['coordinate'];
+        $placeName  = $result['placeName'];
+
+        $this->isGeocodingWrite = true;
+
+        $this->GeoCoordinatesLatitude  = $coordinate->getLatitude();
+        $this->GeoCoordinatesLongitude = $coordinate->getLongitude();
+
+        // Auto-fill the Name only when the geocoder found a named place and the field is empty.
+        if (empty($this->Name) && $placeName !== null) {
+            $this->Name = $placeName;
+        }
+
+        $this->write();
+
+        $this->isGeocodingWrite = false;
     }
 
     /**

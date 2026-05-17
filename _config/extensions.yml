@@ -9,15 +9,3 @@ SilverStripe\Admin\LeftAndMain:
   extensions:
     - Clesson\Silverstripe\Geocoding\Extensions\LeftAndMainExtension
 
-Clesson\Silverstripe\Geocoding\Models\Address:
-  extensions:
-    - Clesson\Silverstripe\Geocoding\Extensions\AddressExtension
-
-Clesson\Silverstripe\Contacts\Forms\GridFieldConfig_AddressesInContactManager:
-  extensions:
-    - Clesson\Silverstripe\Geocoding\Extensions\AddressGridFieldExtension
-
-Clesson\Silverstripe\Contacts\Forms\GridFieldConfig_AddressesInContact:
-  extensions:
-    - Clesson\Silverstripe\Geocoding\Extensions\AddressGridFieldExtension
-
