@@ -15,14 +15,14 @@
         padding:     8px 12px;
         border:      1px solid #ddd;
         border-radius: 4px;
-        background:  #fafafa;
+        background:  #fff;
         min-height:  42px;
     }
 
     .address-field__title {
         flex:        1;
         font-size:   14px;
-        color:       #333;
+        color:       rgb(86, 107, 141);
 
         &--empty {
             color:       #999;
@@ -36,6 +36,7 @@
         flex-shrink: 0;
 
         .address-field__btn {
+            border: none;
             display:         inline-flex;
             align-items:     center;
             justify-content: center;

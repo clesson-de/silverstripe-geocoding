@@ -123,3 +123,29 @@ en:
     QUOTA: 'Quota (calls per day)'
     SORT: 'Priority'
     GEOCODING_SERVICE: 'Service'
+
+  Clesson\Silverstripe\Geocoding\Elements\ElementMapView:
+    TYPE: 'Map'
+    ZOOM: 'Zoom level'
+    ZOOM_DESCRIPTION: '0 = automatically fit all markers in view'
+    ZOOM_AUTO: 'auto'
+    MAP_HEIGHT: 'Map height (px)'
+    MAP_HEIGHT_DESCRIPTION: 'Height of the map in pixels, e.g. 400'
+    MAP_ADDRESSES: 'Addresses'
+    CENTER_ADDRESS: 'Map center'
+    CENTER_ADDRESS_EMPTY: 'Auto-center (fit all markers)'
+    TAB_ADDRESSES: 'Addresses'
+    SUMMARY: '%d address(es), zoom: %s'
+    SHOW_ZOOM_CONTROL: 'Show zoom control'
+    SHOW_FULLSCREEN_CONTROL: 'Show fullscreen control'
+    SHOW_SCALE_CONTROL: 'Show scale control'
+
+  Clesson\Silverstripe\Geocoding\Models\ElementMapViewAddress:
+    INFO_WINDOW_TEXT: 'Info window text'
+    ACTIVE: 'Active'
+    SHOW_MARKER: 'Show marker'
+    SORT: 'Sort order'
+    ADDRESS: 'Address'
+    MARKER_IMAGE: 'Marker image'
+    ADD_ADDRESS: 'Add address'
+

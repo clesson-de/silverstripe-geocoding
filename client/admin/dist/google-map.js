@@ -46,6 +46,9 @@
                 // Disable UI controls and gestures when readonly
                 disableDefaultUI: params.isReadonly,
                 gestureHandling: params.isReadonly ? 'none' : 'auto',
+                zoomControl: !params.isReadonly && params.showZoomControl,
+                fullscreenControl: !params.isReadonly && params.showFullscreenControl,
+                scaleControl: !params.isReadonly && params.showScaleControl,
             });
 
             let marker = null;
@@ -132,6 +135,10 @@
                 };
                 if (icon) {
                     opts.icon = icon;
+                }
+                // Disable pointer cursor when no info window is present
+                if (!markerData.infoWindow) {
+                    opts.clickable = false;
                 }
                 const additionalMarker = new google.maps.Marker(opts);
                 bindGooglePopup(additionalMarker, markerData);

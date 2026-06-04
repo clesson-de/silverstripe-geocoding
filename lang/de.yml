@@ -122,3 +122,29 @@ de:
     QUOTA: 'Kontingent (Aufrufe pro Tag)'
     SORT: 'Priorität'
     GEOCODING_SERVICE: 'Dienst'
+
+  Clesson\Silverstripe\Geocoding\Elements\ElementMapView:
+    TYPE: 'Karte'
+    ZOOM: 'Zoomstufe'
+    ZOOM_DESCRIPTION: '0 = automatisch alle Marker einpassen'
+    ZOOM_AUTO: 'automatisch'
+    MAP_HEIGHT: 'Kartenhöhe (px)'
+    MAP_HEIGHT_DESCRIPTION: 'Höhe der Karte in Pixeln, z.B. 400'
+    MAP_ADDRESSES: 'Adressen'
+    CENTER_ADDRESS: 'Kartenmittelpunkt'
+    CENTER_ADDRESS_EMPTY: 'Automatisch zentrieren (alle Marker einpassen)'
+    TAB_ADDRESSES: 'Adressen'
+    SUMMARY: '%d Adresse(n), Zoom: %s'
+    SHOW_ZOOM_CONTROL: 'Zoom-Steuerung anzeigen'
+    SHOW_FULLSCREEN_CONTROL: 'Vollbild-Steuerung anzeigen'
+    SHOW_SCALE_CONTROL: 'Maßstabsleiste anzeigen'
+
+  Clesson\Silverstripe\Geocoding\Models\ElementMapViewAddress:
+    INFO_WINDOW_TEXT: 'Infofenster-Text'
+    ACTIVE: 'Aktiv'
+    SHOW_MARKER: 'Marker anzeigen'
+    SORT: 'Sortierung'
+    ADDRESS: 'Adresse'
+    MARKER_IMAGE: 'Markerbild'
+    ADD_ADDRESS: 'Adresse hinzufügen'
+

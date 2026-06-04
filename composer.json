@@ -18,7 +18,8 @@
         "clesson-de/silverstripe-autocomplete": "^1.0",
         "commerceguys/addressing": "^2.1",
         "guzzlehttp/guzzle": "^7",
-        "symbiote/silverstripe-gridfieldextensions": "^5"
+        "symbiote/silverstripe-gridfieldextensions": "^5",
+        "dnadesign/silverstripe-elemental": "^6"
     },
     "autoload": {
         "psr-4": {

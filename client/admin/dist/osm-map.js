@@ -60,9 +60,19 @@
                     keyboard: false,
                     zoomControl: false,
                 }
-                : {};
+                : {
+                    zoomControl: params.showZoomControl,
+                };
 
             const map = L.map(container, mapOptions).setView([params.latitude, params.longitude], params.zoom);
+
+            // Add optional controls
+            if (!params.isReadonly && params.showScaleControl) {
+                L.control.scale().addTo(map);
+            }
+            if (!params.isReadonly && params.showFullscreenControl && L.control.fullscreen) {
+                L.control.fullscreen().addTo(map);
+            }
 
             // Build tile layer — use activeLayer to select the right URL from layerTileUrls
             const layerTileUrls = config.layerTileUrls || {};
@@ -115,6 +125,10 @@
                 const opts = {};
                 if (icon) {
                     opts.icon = icon;
+                }
+                // Disable pointer cursor when no info window is present
+                if (!markerData.infoWindow) {
+                    opts.interactive = false;
                 }
                 const additionalMarker = L.marker([markerData.lat, markerData.lng], opts).addTo(map);
                 Utils.bindLeafletPopup(additionalMarker, markerData);

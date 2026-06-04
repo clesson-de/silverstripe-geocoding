@@ -197,6 +197,11 @@ window.GeocodingMapUtils = (function() {
                 opts.iconSize     = [markerData.iconWidth, markerData.iconHeight];
                 opts.iconAnchor   = [Math.round(markerData.iconWidth / 2), markerData.iconHeight];
                 opts.popupAnchor  = [0, -markerData.iconHeight];
+            } else {
+                // Fallback: assume a standard marker size with bottom-center anchor
+                opts.iconSize     = [25, 41];
+                opts.iconAnchor   = [12, 41];
+                opts.popupAnchor  = [0, -41];
             }
             return L.icon(opts);
         },
@@ -264,6 +269,9 @@ window.GeocodingMapUtils = (function() {
                 additionalMarkers: additionalMarkers,
                 route: route,
                 fitBounds: container.dataset.fitBounds === 'true',
+                showZoomControl: container.dataset.showZoomControl !== 'false',
+                showFullscreenControl: container.dataset.showFullscreenControl === 'true',
+                showScaleControl: container.dataset.showScaleControl === 'true',
                 latFieldId: container.dataset.latitudeFieldId,
                 lngFieldId: container.dataset.longitudeFieldId,
             };
