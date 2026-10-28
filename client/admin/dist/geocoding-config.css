@@ -1,0 +1,53 @@
+.geocoding-config-cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  width: 100%;
+  margin: 0;
+}
+.geocoding-config-cards > .geocoding-config-card {
+  min-width: 0;
+  margin: 0;
+  padding: 20px;
+  border: 1px solid #c4cdd8;
+  border-radius: 8px;
+  background: #f3f6fa;
+}
+.geocoding-config-cards > .geocoding-config-card > .header {
+  margin: 0 0 12px;
+  font-size: 18px;
+  line-height: 1.4;
+}
+.geocoding-config-cards > .geocoding-config-card > .message {
+  margin: 0 0 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #526170;
+  line-height: 1.5;
+}
+.geocoding-config-cards > .geocoding-config-card > .form-group {
+  margin-right: 0;
+  margin-left: 0;
+}
+.geocoding-config-cards > .geocoding-config-card > .form-group > .form__field-label,
+.geocoding-config-cards > .geocoding-config-card > .form-group > .form__field-holder {
+  flex: 0 0 100%;
+  max-width: 100%;
+  padding-right: 0;
+  padding-left: 0;
+}
+.geocoding-config-cards > .geocoding-config-card .grid-field {
+  min-width: 0;
+  width: 100%;
+  margin-bottom: 0;
+  overflow-x: auto;
+}
+.geocoding-config-cards > .geocoding-config-card .grid-field__table {
+  width: 100%;
+}
+@media (min-width: 1200px) {
+  .geocoding-config-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

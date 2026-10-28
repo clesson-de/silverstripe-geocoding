@@ -20,14 +20,14 @@ class LeftAndMainExtension extends Extension
 {
 
     /**
-     * Injects the address grid CSS into the CMS.
+     * Loads address grid and settings card styles before CMS navigation.
      *
      * @return void
      */
-    public function init(): void
+    public function onAfterInit(): void
     {
         Requirements::css('clesson-de/silverstripe-geocoding:client/admin/dist/address-grid.css');
+        Requirements::css('clesson-de/silverstripe-geocoding:client/admin/dist/geocoding-config.css');
     }
 
 }
-

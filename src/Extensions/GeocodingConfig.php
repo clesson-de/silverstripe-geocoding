@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Clesson\Silverstripe\Geocoding\Extensions;
 
-use Clesson\Silverstripe\Geocoding\Forms\GridFieldConfig_GeocodingServiceAssignment;
+use Clesson\Silverstripe\Geocoding\Forms\GridFieldConfig_GeocodeServicesInSiteConfig;
+use Clesson\Silverstripe\Geocoding\Forms\GridFieldConfig_ReverseGeocodeServicesInSiteConfig;
+use Clesson\Silverstripe\Geocoding\Forms\GridFieldConfig_RouteServicesInSiteConfig;
 use Clesson\Silverstripe\Geocoding\Models\GeocodingService;
 use Clesson\Silverstripe\Geocoding\Models\SiteConfigGeocodeService;
 use Clesson\Silverstripe\Geocoding\Models\SiteConfigReverseGeocodeService;
 use Clesson\Silverstripe\Geocoding\Models\SiteConfigRouteService;
 use SilverStripe\Core\Extension;
+use SilverStripe\Forms\CompositeField;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridField;
@@ -84,10 +87,6 @@ class GeocodingConfig extends Extension
             GeocodingService::get()->filter('Active', true)->map('ID', 'Name')
         );
         $mapDisplayServiceField->setEmptyString(_t(__CLASS__ . '.MAP_DISPLAY_SERVICE_EMPTY', '-- Select a service --'));
-        $mapDisplayServiceField->setDescription(
-            _t(__CLASS__ . '.MAP_DISPLAY_SERVICE_DESCRIPTION', 'Choose which geocoding service provider should render interactive maps (e.g. in the CMS).')
-        );
-        $fields->addFieldToTab('Root.Geocoding', $mapDisplayServiceField);
 
         /** @var HeaderField $geocodeHeader */
         $geocodeHeader = HeaderField::create(
@@ -95,7 +94,6 @@ class GeocodingConfig extends Extension
             _t(__CLASS__ . '.GEOCODE_SERVICES_HEADER', 'Geocoding (Address → Coordinates)'),
             2
         );
-        $fields->addFieldToTab('Root.Geocoding', $geocodeHeader);
 
         /** @var LiteralField $geocodeDescription */
         $geocodeDescription = LiteralField::create(
@@ -105,16 +103,14 @@ class GeocodingConfig extends Extension
                 'Convert street addresses into geographic coordinates (latitude/longitude). Services are processed in order (drag to reorder) — the first with available quota is used.'
             ) . '</p>'
         );
-        $fields->addFieldToTab('Root.Geocoding', $geocodeDescription);
 
         /** @var GridField $geocodeServicesField */
         $geocodeServicesField = GridField::create(
             'Geocoding_GeocodeServices',
             $this->getOwner()->fieldLabel('Geocoding_GeocodeServices'),
             $this->getOwner()->Geocoding_GeocodeServices(),
-            GridFieldConfig_GeocodingServiceAssignment::create()
+            GridFieldConfig_GeocodeServicesInSiteConfig::create()
         );
-        $fields->addFieldToTab('Root.Geocoding', $geocodeServicesField);
 
         /** @var HeaderField $reverseGeocodeHeader */
         $reverseGeocodeHeader = HeaderField::create(
@@ -122,7 +118,6 @@ class GeocodingConfig extends Extension
             _t(__CLASS__ . '.REVERSE_GEOCODE_SERVICES_HEADER', 'Reverse Geocoding (Coordinates → Address)'),
             2
         );
-        $fields->addFieldToTab('Root.Geocoding', $reverseGeocodeHeader);
 
         /** @var LiteralField $reverseGeocodeDescription */
         $reverseGeocodeDescription = LiteralField::create(
@@ -132,16 +127,14 @@ class GeocodingConfig extends Extension
                 'Resolve geographic coordinates (latitude/longitude) back into human-readable addresses. Services are processed in order (drag to reorder) — the first with available quota is used.'
             ) . '</p>'
         );
-        $fields->addFieldToTab('Root.Geocoding', $reverseGeocodeDescription);
 
         /** @var GridField $reverseGeocodeServicesField */
         $reverseGeocodeServicesField = GridField::create(
             'Geocoding_ReverseGeocodeServices',
             $this->getOwner()->fieldLabel('Geocoding_ReverseGeocodeServices'),
             $this->getOwner()->Geocoding_ReverseGeocodeServices(),
-            GridFieldConfig_GeocodingServiceAssignment::create()
+            GridFieldConfig_ReverseGeocodeServicesInSiteConfig::create()
         );
-        $fields->addFieldToTab('Root.Geocoding', $reverseGeocodeServicesField);
 
         /** @var HeaderField $routeHeader */
         $routeHeader = HeaderField::create(
@@ -149,7 +142,6 @@ class GeocodingConfig extends Extension
             _t(__CLASS__ . '.ROUTE_SERVICES_HEADER', 'Routing (Calculate Routes)'),
             2
         );
-        $fields->addFieldToTab('Root.Geocoding', $routeHeader);
 
         /** @var LiteralField $routeDescription */
         $routeDescription = LiteralField::create(
@@ -159,17 +151,49 @@ class GeocodingConfig extends Extension
                 'Calculate routes, distances and travel times between locations. Services are processed in order (drag to reorder) — the first with available quota is used.'
             ) . '</p>'
         );
-        $fields->addFieldToTab('Root.Geocoding', $routeDescription);
 
         /** @var GridField $routeServicesField */
         $routeServicesField = GridField::create(
             'Geocoding_RouteServices',
             $this->getOwner()->fieldLabel('Geocoding_RouteServices'),
             $this->getOwner()->Geocoding_RouteServices(),
-            GridFieldConfig_GeocodingServiceAssignment::create()
+            GridFieldConfig_RouteServicesInSiteConfig::create()
         );
-        $fields->addFieldToTab('Root.Geocoding', $routeServicesField);
+        $geocodingTab->setChildren(FieldList::create($this->cards([
+            [$this->mapDisplayHeader(), $this->mapDisplayDescription(), $mapDisplayServiceField],
+            [$routeHeader, $routeDescription, $routeServicesField],
+            [$reverseGeocodeHeader, $reverseGeocodeDescription, $reverseGeocodeServicesField],
+            [$geocodeHeader, $geocodeDescription, $geocodeServicesField],
+        ])));
     }
 
+    /** Reuses the existing field instances to preserve values, relation actions and validation. */
+    private function cards(array $groups): CompositeField
+    {
+        $cards = [];
+        foreach ($groups as $index => $group) {
+            $card = CompositeField::create(...$group)->setName('GeocodingCard' . $index);
+            $card->setFieldHolderTemplate('Clesson/Silverstripe/Geocoding/Forms/GeocodingConfigGroup');
+            $card->addExtraClass('geocoding-config-card');
+            $cards[] = $card;
+        }
+        $layout = CompositeField::create(...$cards)->setName('GeocodingCards');
+        $layout->setFieldHolderTemplate('Clesson/Silverstripe/Geocoding/Forms/GeocodingConfigGroup');
+        return $layout->addExtraClass('geocoding-config-cards');
+    }
 
+    /** Gives map display the same visual hierarchy as the three lookup services. */
+    private function mapDisplayHeader(): HeaderField
+    {
+        return HeaderField::create('MapDisplayHeader', _t(__CLASS__ . '.MAP_DISPLAY_SERVICE', 'Map display service'), 2);
+    }
+
+    /** Keeps descriptions outside form-field labels for a consistent card layout. */
+    private function mapDisplayDescription(): LiteralField
+    {
+        $description = _t(__CLASS__ . '.MAP_DISPLAY_SERVICE_DESCRIPTION',
+            'Choose which geocoding service provider should render interactive maps (e.g. in the CMS).');
+        return LiteralField::create('MapDisplayDescription', '<p class="message">'
+            . htmlspecialchars($description, ENT_QUOTES, 'UTF-8') . '</p>');
+    }
 }

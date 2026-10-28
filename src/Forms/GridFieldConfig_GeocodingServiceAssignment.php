@@ -5,21 +5,21 @@ declare(strict_types=1);
 namespace Clesson\Silverstripe\Geocoding\Forms;
 
 use Clesson\Silverstripe\Geocoding\Models\GeocodingService;
+use Clesson\Silverstripe\Forms\GridField\GridFieldAddExistingSelect;
+use Clesson\Silverstripe\Forms\GridField\GridFieldAddNewDropdown;
 use SilverStripe\Core\ClassInfo;
-use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\Forms\GridField\GridFieldConfig;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\ORM\FieldType\DBField;
-use Symbiote\GridFieldExtensions\GridFieldAddNewMultiClass;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
 
 /**
  * GridField configuration for managing GeocodingService assignments in SiteConfig.
  *
- * Uses GridFieldAddNewMultiClass to select service types (OpenStreetMap, Google)
+ * Uses GridFieldAddNewDropdown to select service types (OpenStreetMap, Google)
  * and GridFieldOrderableRows for drag-and-drop priority sorting.
  *
  * Designed for use with ManyManyThroughList relations where the join table
@@ -41,8 +41,8 @@ class GridFieldConfig_GeocodingServiceAssignment extends GridFieldConfig
     {
         parent::__construct();
 
-        /** @var GridFieldAddNewMultiClass $addNewMultiClassButton */
-        $addNewMultiClassButton = GridFieldAddNewMultiClass::create();
+        /** @var GridFieldAddNewDropdown $addNewMultiClassButton */
+        $addNewMultiClassButton = GridFieldAddNewDropdown::create();
 
         $classes = [];
         foreach (ClassInfo::subclassesFor(GeocodingService::class, false) as $class) {
@@ -73,9 +73,10 @@ class GridFieldConfig_GeocodingServiceAssignment extends GridFieldConfig
             ],
         ]);
 
-        /** @var GridFieldAddExistingAutocompleter $addExisting */
-        $addExisting = GridFieldAddExistingAutocompleter::create();
+        /** @var GridFieldAddExistingSelect $addExisting */
+        $addExisting = GridFieldAddExistingSelect::create();
         $addExisting->setSearchFields(['Name']);
+        $addExisting->setResultsFormat('$Name');
 
         $this->addComponent($addExisting);
         $this->addComponent($addNewMultiClassButton);
@@ -87,4 +88,3 @@ class GridFieldConfig_GeocodingServiceAssignment extends GridFieldConfig
     }
 
 }
-

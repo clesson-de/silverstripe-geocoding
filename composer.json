@@ -16,6 +16,7 @@
         "ext-gd": "*",
         "silverstripe/framework": "^6",
         "clesson-de/silverstripe-autocomplete": "^1.0",
+        "clesson-de/silverstripe-gridfield-pro": "^2",
         "commerceguys/addressing": "^2.1",
         "guzzlehttp/guzzle": "^7",
         "symbiote/silverstripe-gridfieldextensions": "^5",
@@ -34,4 +35,3 @@
     "prefer-stable": true,
     "minimum-stability": "dev"
 }
-

@@ -13,6 +13,10 @@ Geocoding, reverse geocoding and routing for Silverstripe CMS 6.1, backed by **O
 - **Region dropdown API** — AJAX endpoint for dynamic region/state dropdowns based on the selected country
 - **Automatic geocoding** — `Address` records are geocoded automatically after each write (via `AddressExtension`)
 - **SiteConfig tab** — manage geocoding service records directly from the CMS Settings panel
+- **Grouped configuration** — map display, routing, reverse geocoding and geocoding
+  each have a separate rounded card with a heading, description and existing
+  controls. Wide desktop views show two columns with a 20px gap; smaller views
+  stack cards vertically. Admin styles are compiled with `npm run build:css`.
 - **Custom `DBGeoCoordinate` composite field** — store latitude + longitude in a single `$db` declaration
 - **Rate limiting** — configurable per-service delay between API requests (required by Nominatim's usage policy)
 
@@ -24,6 +28,7 @@ Geocoding, reverse geocoding and routing for Silverstripe CMS 6.1, backed by **O
 |---|---|
 | PHP | `^8.1` |
 | silverstripe/framework | `^6` |
+| clesson-de/silverstripe-gridfield-pro | `^2` |
 | commerceguys/addressing | `^2.1` |
 | guzzlehttp/guzzle | `^7` |
 
@@ -85,14 +90,28 @@ Requires `CMS_ACCESS` permission.
 3. Open the **Geocoding** tab.
 4. **Select a map display service** — choose which service provider (Google or OpenStreetMap) should render interactive maps in the CMS.
 5. Add geocoding services for each method (geocode, reverse geocode, route):
-   - Use the **Add** button to link existing services or **Add new** to create a service inline.
+   - Type at least **two characters** into the searchable select to find existing services by name. Selecting a result immediately links it; already linked services are excluded.
+   - Use **New** (**Neu** in German) to choose a service type and open its creation form.
    - Set the **Quota** (maximum calls per day; 0 = unlimited).
    - **Drag** services to change their priority order — the first service with available quota is used.
 6. Save the Settings page.
 
+Each service GridField has a dedicated configuration class in `src/Forms/`:
+`GridFieldConfig_RouteServicesInSiteConfig`,
+`GridFieldConfig_ReverseGeocodeServicesInSiteConfig` and
+`GridFieldConfig_GeocodeServicesInSiteConfig`. They share
+`GridFieldConfig_GeocodingServiceAssignment`, which configures the
+`GridFieldAddExistingSelect` and `GridFieldAddNewDropdown` components from GridField
+Pro along with the existing sorting and editing controls. The compact **New**
+button offers the permitted service types, or opens the creation form directly
+when only one type is available. Both components automatically load their
+compiled CSS and JavaScript from GridField Pro. The creation button itself has
+no dependency on GridField Extensions; this module still uses GridField
+Extensions for drag-and-drop ordering.
+
 #### Creating a new geocoding service
 
-1. In the **Geocoding** tab, click **Add new** under any method section.
+1. In the **Geocoding** tab, click **New** under any method section.
 2. Choose the service type: **OpenStreetMap service** or **Google service**.
 3. Fill in the form:
    - **Name** — a descriptive label for this service record.
@@ -409,4 +428,3 @@ if ($result !== null) {
 ## License
 
 BSD 3-Clause License — see [LICENSE](LICENSE).
-
